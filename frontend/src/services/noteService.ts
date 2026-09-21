@@ -1,4 +1,4 @@
-import { request } from './api';
+import { request, API_BASE_URL } from './api';
 import {
   NoteDocument,
   NotePage,
@@ -76,6 +76,6 @@ export const noteService = {
   },
 
   getPdfDownloadUrl(documentId: number): string {
-    return `/api/notes/${documentId}/download/pdf`;
+    return `${API_BASE_URL}/notes/${documentId}/download/pdf`;
   }
 };
