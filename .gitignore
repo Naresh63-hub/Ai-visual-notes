@@ -1,0 +1,38 @@
+# Dependencies
+node_modules/
+frontend/node_modules/
+
+# Build outputs
+target/
+backend/target/
+dist/
+frontend/dist/
+build/
+
+# Temporary and Cache
+.freebuff/
+*.log
+.system_generated/
+.cache/
+.eslintcache
+
+# Environment & Secrets
+.env
+.env.local
+.env.*.local
+*.pem
+
+# IDE & Editor files
+.idea/
+.vscode/
+*.iml
+*.iws
+*.ipr
+.project
+.classpath
+.settings/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+desktop.ini
