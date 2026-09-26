@@ -9,8 +9,6 @@ import {
 } from './components/common';
 import { HeroPromptInput } from './components/home/HeroPromptInput';
 import { RecentNotesList } from './components/home/RecentNotesList';
-import { TopicCountModal } from './components/planner/TopicCountModal';
-import { PagePlanEditorModal } from './components/planner/PagePlanEditorModal';
 import { VisualNotePage } from './components/viewer/VisualNotePage';
 import { PageToolbar } from './components/viewer/PageToolbar';
 import { RegeneratePageModal } from './components/viewer/RegeneratePageModal';
@@ -21,8 +19,6 @@ import { AuthModal } from './components/auth/AuthModal';
 import {
   NoteDocument,
   NotePage,
-  PromptAnalysisResponse,
-  PagePlan,
   NoteStyle,
   PageContent,
   User,
@@ -40,22 +36,11 @@ export function App() {
   const [currentDocument, setCurrentDocument] = useState<NoteDocument | null>(null);
   const [currentPageIndex, setCurrentPageIndex] = useState<number>(0);
   const [zoom, setZoom] = useState<number>(100);
-  const [currentStyle, setCurrentStyle] = useState<NoteStyle>('Handwritten');
-
-  // Multi-Topic & Planning states
-  const [analysis, setAnalysis] = useState<PromptAnalysisResponse | null>(null);
-  const [pagePlan, setPagePlan] = useState<PagePlan | null>(null);
-  const [isTopicCountModalOpen, setIsTopicCountModalOpen] = useState(false);
-  const [isPlanEditorOpen, setIsPlanEditorOpen] = useState(false);
-  const [currentPrompt, setCurrentPrompt] = useState<string>('');
-  const [currentAudience, setCurrentAudience] = useState<string>('B.Tech / College');
-  const [currentDetail, setCurrentDetail] = useState<string>('Standard');
 
   // Loading & Progress states
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
-  const [generationStep, setGenerationStep] = useState<string>('');
+  const [generationStep, setGenerationStep] = useState<string>('Understanding your topic...');
 
   // Modals & Drawers
   const [isRegenerateOpen, setIsRegenerateOpen] = useState(false);
@@ -89,102 +74,45 @@ export function App() {
     }
   };
 
-  // Step 1: Prompt Submission -> Analysis
-  const handleStartPrompt = async (
-    prompt: string,
-    style: NoteStyle,
-    detailLevel: string,
-    audience: string
-  ) => {
-    setCurrentPrompt(prompt);
-    setCurrentStyle(style);
-    setCurrentDetail(detailLevel);
-    setCurrentAudience(audience);
-    setIsAnalyzing(true);
-    setGenerationStep('Analyzing topic requirements...');
-
-    try {
-      const analysisResult = await noteService.analyzePrompt(prompt, style);
-      setAnalysis(analysisResult);
-
-      // Check if multi-topic or explicit page count
-      if (analysisResult.topicCount > 1 && !analysisResult.requestedPageCount) {
-        setIsAnalyzing(false);
-        setIsTopicCountModalOpen(true);
-      } else {
-        // Direct plan generation
-        const pagesToPlan = analysisResult.requestedPageCount || analysisResult.suggestedPageCount || 1;
-        await generatePlanAndProceed(prompt, pagesToPlan, audience, style, analysisResult.difficulty);
-      }
-    } catch (err: any) {
-      setIsAnalyzing(false);
-      addToast('error', err.message || 'Failed to analyze prompt');
-    }
-  };
-
-  // Step 2: Confirm Page Count (from modal)
-  const handleConfirmPageCount = async (count: number) => {
-    setIsTopicCountModalOpen(false);
-    setIsAnalyzing(true);
-    setGenerationStep('Synthesizing structured page plan...');
-
-    try {
-      await generatePlanAndProceed(
-        currentPrompt,
-        count,
-        currentAudience,
-        currentStyle,
-        analysis?.difficulty || 'Intermediate'
-      );
-    } catch (err: any) {
-      setIsAnalyzing(false);
-      addToast('error', err.message || 'Failed to plan pages');
-    }
-  };
-
-  const generatePlanAndProceed = async (
-    prompt: string,
-    pages: number,
-    audience: string,
-    style: NoteStyle,
-    difficulty: string
-  ) => {
-    const plan = await noteService.planPages(prompt, pages, audience, style, difficulty);
-    setPagePlan(plan);
-    setIsAnalyzing(false);
-
-    if (pages > 1) {
-      setIsPlanEditorOpen(true);
-    } else {
-      // Single page directly generates
-      await handleExecuteGeneration(plan);
-    }
-  };
-
-  // Step 3: Execute final generation
-  const handleExecuteGeneration = async (finalPlan: PagePlan) => {
-    setIsPlanEditorOpen(false);
+  // Seamless Generation: User enters topic -> AI handles everything
+  const handleStartPrompt = async (prompt: string) => {
     setIsGenerating(true);
-    setGenerationStep(`Rendering ${finalPlan.totalPages} high-precision visual note pages...`);
+    setGenerationStep('Understanding your topic...');
+
+    const stepTimer1 = setTimeout(() => {
+      setGenerationStep('Creating your notes...');
+    }, 900);
+
+    const stepTimer2 = setTimeout(() => {
+      setGenerationStep('Preparing your handwritten pages...');
+    }, 1800);
 
     try {
+      const analysisResult = await noteService.analyzePrompt(prompt, 'Handwritten');
+      const pagesToPlan = analysisResult.requestedPageCount || analysisResult.suggestedPageCount || 1;
+      const plan = await noteService.planPages(prompt, pagesToPlan, 'B.Tech / College', 'Handwritten', analysisResult.difficulty);
+
       const doc = await noteService.generateNotes({
-        prompt: currentPrompt,
-        pageCount: finalPlan.totalPages,
-        style: currentStyle,
-        audience: currentAudience,
-        detailLevel: currentDetail,
-        customPlan: finalPlan,
+        prompt: prompt,
+        pageCount: plan.totalPages,
+        style: 'Handwritten',
+        audience: 'B.Tech / College',
+        detailLevel: 'Detailed',
+        customPlan: plan,
       });
 
+      clearTimeout(stepTimer1);
+      clearTimeout(stepTimer2);
       setCurrentDocument(doc);
       setCurrentPageIndex(0);
       setIsGenerating(false);
       loadRecentNotes();
-      addToast('success', `✓ Successfully generated ${doc.pageCount} visual study note page(s)!`);
+      addToast('success', `✓ Successfully created your notes!`);
     } catch (err: any) {
+      clearTimeout(stepTimer1);
+      clearTimeout(stepTimer2);
       setIsGenerating(false);
-      addToast('error', err.message || 'Failed to generate study notes');
+      addToast('error', err.message || 'Failed to create notes');
     }
   };
 
@@ -193,7 +121,7 @@ export function App() {
     if (!currentDocument) return;
     const pageNum = currentPageIndex + 1;
     setIsGenerating(true);
-    setGenerationStep(`Regenerating Page ${pageNum}...`);
+    setGenerationStep('Preparing your handwritten pages...');
 
     try {
       const updatedPage = await noteService.regeneratePage(
@@ -201,7 +129,7 @@ export function App() {
         pageNum,
         instruction,
         customModifier,
-        style || currentStyle
+        style || 'Handwritten'
       );
 
       const updatedPages = [...currentDocument.pages];
@@ -210,7 +138,7 @@ export function App() {
 
       setIsRegenerateOpen(false);
       setIsGenerating(false);
-      addToast('success', `✓ Page ${pageNum} regenerated with new refinements!`);
+      addToast('success', `✓ Page ${pageNum} updated!`);
     } catch (err: any) {
       setIsGenerating(false);
       addToast('error', err.message || 'Failed to regenerate page');
@@ -235,7 +163,7 @@ export function App() {
       setCurrentDocument({ ...currentDocument, pages: updatedPages });
 
       setIsEditorOpen(false);
-      addToast('success', '✓ Page updated and re-rendered!');
+      addToast('success', '✓ Page updated!');
     } catch (err: any) {
       addToast('error', err.message || 'Failed to update page');
     }
@@ -246,7 +174,6 @@ export function App() {
     try {
       const doc = await noteService.getDocument(id);
       setCurrentDocument(doc);
-      setCurrentStyle(doc.style || 'Handwritten');
       setCurrentPageIndex(0);
       setIsHistoryOpen(false);
       addToast('info', `Opened '${doc.title}'`);
@@ -288,10 +215,9 @@ export function App() {
     const docId = targetDocId || currentDocument?.id;
     if (!docId || !currentDocument) return;
     setIsExporting(true);
-    addToast('info', 'Compiling multi-page vector A4 PDF...');
+    addToast('info', 'Compiling PDF document...');
 
     try {
-      // Allow React to unhide all pages in DOM before canvas capture
       await new Promise((resolve) => setTimeout(resolve, 150));
 
       const pdf = new jsPDF('p', 'mm', 'a4');
@@ -322,7 +248,6 @@ export function App() {
         throw new Error('No pages found for export');
       }
     } catch (e) {
-      // Fallback to backend PDF generator
       window.open(noteService.getPdfDownloadUrl(docId), '_blank');
       setIsExporting(false);
     }
@@ -360,7 +285,7 @@ export function App() {
       try {
         await navigator.share({
           title: currentDocument.title,
-          text: `Check out these visual study notes on ${currentDocument.title} created with AI Visual Notes!`,
+          text: `Check out these handwritten study notes on ${currentDocument.title} created with AI Visual Notes!`,
           url: window.location.href,
         });
       } catch {
@@ -407,7 +332,6 @@ export function App() {
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 text-slate-800">
-      
       {/* Toast notifications */}
       <ToastContainer toasts={toasts} onRemove={removeToast} />
 
@@ -425,17 +349,13 @@ export function App() {
 
       {/* Main Content Area */}
       <main className="flex-1">
-        
-        {/* Loading Overlay */}
-        {(isAnalyzing || isGenerating) && (
-          <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-md flex flex-col items-center justify-center p-6 text-white animate-in fade-in">
-            <div className="w-16 h-16 relative mb-4">
-              <div className="w-16 h-16 border-4 border-indigo-400/30 border-t-indigo-400 rounded-full animate-spin" />
+        {/* Simple User-Friendly Loading Overlay */}
+        {isGenerating && (
+          <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-white animate-in fade-in">
+            <div className="w-14 h-14 relative mb-4">
+              <div className="w-14 h-14 border-4 border-blue-400/30 border-t-blue-400 rounded-full animate-spin" />
             </div>
-            <h3 className="text-xl font-bold tracking-tight mb-1">
-              AI Visual Notes Engine
-            </h3>
-            <p className="text-sm text-indigo-200 font-medium animate-pulse">
+            <p className="text-base text-blue-100 font-medium animate-pulse">
               {generationStep}
             </p>
           </div>
@@ -444,11 +364,11 @@ export function App() {
         {/* View Mode: If document is generated or loaded */}
         {currentDocument && currentDocument.pages && currentDocument.pages.length > 0 ? (
           <div>
-            
             {/* Toolbar */}
             <PageToolbar
               currentPage={currentPageIndex + 1}
               totalPages={currentDocument.pages.length}
+              topicTitle={currentDocument.title}
               onPageChange={(p) => setCurrentPageIndex(p - 1)}
               zoom={zoom}
               onZoomChange={setZoom}
@@ -457,16 +377,12 @@ export function App() {
               onDownloadPdf={() => handleDownloadPdf()}
               onDownloadPng={handleDownloadPng}
               onShare={handleShare}
-              onPrint={() => window.print()}
+              onBack={() => setCurrentDocument(null)}
               isExporting={isExporting}
-              styles={['Handwritten', 'Clean Digital', 'Exam Notes', 'Minimal', 'Colorful Study Notes']}
-              currentStyle={currentStyle}
-              onStyleChange={(s) => setCurrentStyle(s)}
             />
 
             {/* Document Content View */}
             <div className="max-w-5xl mx-auto px-4 py-8 flex flex-col items-center">
-              
               <div 
                 className="w-full flex justify-center transition-transform origin-top"
                 style={{ transform: `scale(${zoom / 100})` }}
@@ -479,7 +395,7 @@ export function App() {
                     >
                       <VisualNotePage
                         content={page.content}
-                        style={currentStyle}
+                        style="Handwritten"
                         pageNumber={page.pageNumber}
                         totalPages={currentDocument.pages.length}
                       />
@@ -487,16 +403,14 @@ export function App() {
                   ))}
                 </div>
               </div>
-
             </div>
-
           </div>
         ) : (
-          /* Home Screen: Prompt Input & Recent Cards */
-          <div className="px-4 py-8 sm:py-12">
+          /* Home Screen: Single clean textarea & Compact Recent Notes */
+          <div className="px-4 py-10 sm:py-16">
             <HeroPromptInput
               onGenerate={handleStartPrompt}
-              isLoading={isAnalyzing || isGenerating}
+              isLoading={isGenerating}
             />
 
             <RecentNotesList
@@ -506,29 +420,10 @@ export function App() {
             />
           </div>
         )}
-
       </main>
 
       {/* Footer */}
       <Footer />
-
-      {/* Multi-Topic Count Detection Modal */}
-      <TopicCountModal
-        isOpen={isTopicCountModalOpen}
-        onClose={() => setIsTopicCountModalOpen(false)}
-        analysis={analysis}
-        onConfirmPageCount={handleConfirmPageCount}
-      />
-
-      {/* Page Plan Review & Editing Modal */}
-      <PagePlanEditorModal
-        isOpen={isPlanEditorOpen}
-        onClose={() => setIsPlanEditorOpen(false)}
-        plan={pagePlan}
-        onProceedToGenerate={handleExecuteGeneration}
-        onRegeneratePlan={() => handleConfirmPageCount(pagePlan?.totalPages || 1)}
-        isPlanning={isAnalyzing}
-      />
 
       {/* Single Page Regenerate Modal */}
       {currentDocument && currentDocument.pages[currentPageIndex] && (
@@ -539,7 +434,7 @@ export function App() {
           topicTitle={currentDocument.pages[currentPageIndex].topicTitle}
           onRegenerate={handleRegeneratePage}
           isRegenerating={isGenerating}
-          currentStyle={currentStyle}
+          currentStyle="Handwritten"
         />
       )}
 
@@ -575,7 +470,6 @@ export function App() {
         onRegister={handleRegister}
         isLoading={isAuthLoading}
       />
-
     </div>
   );
 }
