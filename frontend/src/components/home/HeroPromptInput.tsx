@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Sparkles, ArrowRight } from 'lucide-react';
 
 interface HeroPromptInputProps {
-  onGenerate: (prompt: string) => void;
+  onGenerate: (prompt: string, pageCount: number) => void;
   isLoading: boolean;
 }
 
@@ -11,11 +11,20 @@ export const HeroPromptInput: React.FC<HeroPromptInputProps> = ({
   isLoading,
 }) => {
   const [prompt, setPrompt] = useState('');
+  const [selectedPageOption, setSelectedPageOption] = useState<'1' | '2' | '3' | '4' | 'custom'>('2');
+  const [customPageCount, setCustomPageCount] = useState<number>(5);
+
+  const getEffectivePageCount = (): number => {
+    if (selectedPageOption === 'custom') {
+      return Math.max(1, Math.min(10, customPageCount || 1));
+    }
+    return parseInt(selectedPageOption, 10);
+  };
 
   const handleSubmit = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!prompt.trim() || isLoading) return;
-    onGenerate(prompt.trim());
+    onGenerate(prompt.trim(), getEffectivePageCount());
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -38,8 +47,9 @@ export const HeroPromptInput: React.FC<HeroPromptInputProps> = ({
       </div>
 
       {/* Main Clean Input Box */}
-      <div className="bg-white rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-200 p-4 sm:p-6 transition-all focus-within:border-blue-600 focus-within:ring-4 focus-within:ring-blue-600/10">
-        <form onSubmit={handleSubmit}>
+      <div className="bg-white rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-200 p-5 sm:p-7 transition-all focus-within:border-[#1e3a8a] focus-within:ring-4 focus-within:ring-blue-900/10">
+        <form onSubmit={handleSubmit} className="space-y-5">
+          {/* 1. Topic Textarea */}
           <div className="relative">
             <textarea
               value={prompt}
@@ -52,11 +62,64 @@ export const HeroPromptInput: React.FC<HeroPromptInputProps> = ({
             />
           </div>
 
-          <div className="flex items-center justify-end pt-4 mt-2 border-t border-slate-100">
+          {/* 2. Number of Pages Control */}
+          <div className="pt-4 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-bold text-slate-700">
+                Number of Pages:
+              </span>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2">
+              {(['1', '2', '3', '4'] as const).map((count) => (
+                <button
+                  key={count}
+                  type="button"
+                  onClick={() => setSelectedPageOption(count)}
+                  className={`px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition-all ${
+                    selectedPageOption === count
+                      ? 'bg-[#1e3a8a] text-white shadow-sm scale-105'
+                      : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200/60'
+                  }`}
+                >
+                  {count} {count === '1' ? 'Page' : 'Pages'}
+                </button>
+              ))}
+
+              <button
+                type="button"
+                onClick={() => setSelectedPageOption('custom')}
+                className={`px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition-all ${
+                  selectedPageOption === 'custom'
+                    ? 'bg-[#1e3a8a] text-white shadow-sm scale-105'
+                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200/60'
+                }`}
+              >
+                Custom
+              </button>
+
+              {selectedPageOption === 'custom' && (
+                <div className="flex items-center gap-1.5 ml-1 animate-in fade-in zoom-in-95 duration-150">
+                  <input
+                    type="number"
+                    min={1}
+                    max={10}
+                    value={customPageCount}
+                    onChange={(e) => setCustomPageCount(Math.max(1, Math.min(10, parseInt(e.target.value, 10) || 1)))}
+                    className="w-16 px-2.5 py-1 text-sm font-bold text-slate-900 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900"
+                  />
+                  <span className="text-xs text-slate-500 font-semibold">pages</span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* 3. Generate Notes Button */}
+          <div className="pt-3 flex items-center justify-center sm:justify-end">
             <button
               type="submit"
               disabled={!prompt.trim() || isLoading}
-              className={`w-full sm:w-auto flex items-center justify-center gap-2 px-7 py-3 rounded-xl font-bold text-sm text-white shadow-md transition-all active:scale-95 ${
+              className={`w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl font-bold text-sm text-white shadow-md transition-all active:scale-95 ${
                 !prompt.trim() || isLoading
                   ? 'bg-slate-300 cursor-not-allowed shadow-none'
                   : 'bg-[#1e3a8a] hover:bg-[#172554] shadow-blue-900/20'

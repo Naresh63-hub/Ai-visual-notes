@@ -74,8 +74,8 @@ export function App() {
     }
   };
 
-  // Seamless Generation: User enters topic -> AI handles everything
-  const handleStartPrompt = async (prompt: string) => {
+  // Seamless Generation: User enters topic & selects pageCount -> AI handles everything
+  const handleStartPrompt = async (prompt: string, pageCount: number = 2) => {
     setIsGenerating(true);
     setGenerationStep('Understanding your topic...');
 
@@ -88,8 +88,8 @@ export function App() {
     }, 1800);
 
     try {
-      const analysisResult = await noteService.analyzePrompt(prompt, 'Handwritten');
-      const pagesToPlan = analysisResult.requestedPageCount || analysisResult.suggestedPageCount || 1;
+      const analysisResult = await noteService.analyzePrompt(prompt, 'Handwritten', pageCount);
+      const pagesToPlan = pageCount || analysisResult.requestedPageCount || analysisResult.suggestedPageCount || 2;
       const plan = await noteService.planPages(prompt, pagesToPlan, 'B.Tech / College', 'Handwritten', analysisResult.difficulty);
 
       const doc = await noteService.generateNotes({
