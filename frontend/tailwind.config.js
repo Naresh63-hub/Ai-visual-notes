@@ -7,7 +7,7 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        hand: ['Caveat', 'Kalam', 'Patrick Hand', 'cursive'],
+        hand: ['Kalam', 'Patrick Hand', 'Caveat', 'cursive'],
         sans: ['Plus Jakarta Sans', 'Inter', 'system-ui', 'sans-serif'],
         mono: ['Fira Code', 'monospace']
       },
