@@ -27,6 +27,7 @@ public class PageContentDto {
     private FormulaDto formula;
     private ComplexityDto complexity;
     private DiagramDataDto diagram;
+    private ComparisonTableDto comparisonTable;
     
     private List<String> advantages;
     private List<String> limitations;
@@ -124,6 +125,8 @@ public class PageContentDto {
     public void setComplexity(ComplexityDto complexity) { this.complexity = complexity; }
     public DiagramDataDto getDiagram() { return diagram; }
     public void setDiagram(DiagramDataDto diagram) { this.diagram = diagram; }
+    public ComparisonTableDto getComparisonTable() { return comparisonTable; }
+    public void setComparisonTable(ComparisonTableDto comparisonTable) { this.comparisonTable = comparisonTable; }
     public List<String> getAdvantages() { return advantages; }
     public void setAdvantages(List<String> advantages) { this.advantages = advantages; }
     public List<String> getLimitations() { return limitations; }
@@ -169,6 +172,7 @@ public class PageContentDto {
         private FormulaDto formula;
         private ComplexityDto complexity;
         private DiagramDataDto diagram;
+        private ComparisonTableDto comparisonTable;
         private List<String> advantages;
         private List<String> limitations;
         private List<KeyPointDto> keyPoints;
@@ -200,6 +204,7 @@ public class PageContentDto {
         public Builder formula(FormulaDto formula) { this.formula = formula; return this; }
         public Builder complexity(ComplexityDto complexity) { this.complexity = complexity; return this; }
         public Builder diagram(DiagramDataDto diagram) { this.diagram = diagram; return this; }
+        public Builder comparisonTable(ComparisonTableDto comparisonTable) { this.comparisonTable = comparisonTable; return this; }
         public Builder advantages(List<String> advantages) { this.advantages = advantages; return this; }
         public Builder limitations(List<String> limitations) { this.limitations = limitations; return this; }
         public Builder keyPoints(List<KeyPointDto> keyPoints) { this.keyPoints = keyPoints; return this; }
@@ -211,10 +216,12 @@ public class PageContentDto {
         public Builder styleTheme(String styleTheme) { this.styleTheme = styleTheme; return this; }
 
         public PageContentDto build() {
-            return new PageContentDto(documentTitle, pageNumber, totalPages, topicTitle, topicSubtitle, categoryBadge,
+            PageContentDto dto = new PageContentDto(documentTitle, pageNumber, totalPages, topicTitle, topicSubtitle, categoryBadge,
                     difficultyLevel, domain, subdomain, pagePartTitle, definition, purpose, mainIdea, simpleExplanation,
                     sections, algorithm, pseudocode, example, formula, complexity, diagram, advantages, limitations,
                     keyPoints, examTips, quickTakeaways, continuesOnNextPage, isContinuation, layoutHint, styleTheme);
+            dto.setComparisonTable(comparisonTable);
+            return dto;
         }
     }
 }

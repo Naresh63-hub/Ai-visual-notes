@@ -74,4 +74,28 @@ class PromptUnderstandingEngineTest {
         assertNotNull(response);
         assertEquals(4, response.getRequestedPageCount());
     }
+
+    @Test
+    void testAutomataDomainClassification() {
+        PromptUnderstandingEngine.PromptAnalysisResult response = engine.analyze(
+                "Define NFA and DFA with formal 5-tuple and state transition diagram", "Handwritten", null);
+        assertNotNull(response);
+        assertEquals(DomainType.THEORY_OF_COMPUTATION, response.getDomain());
+    }
+
+    @Test
+    void testOperatingSystemsDomainClassification() {
+        PromptUnderstandingEngine.PromptAnalysisResult response = engine.analyze(
+                "Explain CPU Scheduling Algorithms FCFS, SJF, Round Robin with Gantt Chart", "Handwritten", null);
+        assertNotNull(response);
+        assertEquals(DomainType.OPERATING_SYSTEMS, response.getDomain());
+    }
+
+    @Test
+    void testElectronicsDomainClassification() {
+        PromptUnderstandingEngine.PromptAnalysisResult response = engine.analyze(
+                "Explain Ohm's Law with circuit diagram and IV characteristics", "Handwritten", null);
+        assertNotNull(response);
+        assertEquals(DomainType.ELECTRONICS, response.getDomain());
+    }
 }

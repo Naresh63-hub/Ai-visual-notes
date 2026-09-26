@@ -118,6 +118,35 @@ public class ExportService {
                         y -= 8;
                     }
 
+                    // Comparison Table (if present)
+                    if (content.getComparisonTable() != null && y > 120) {
+                        stream.beginText();
+                        stream.setFont(fontBold, 10.5f);
+                        stream.setNonStrokingColor(0.1f, 0.2f, 0.5f);
+                        stream.newLineAtOffset(margin + 12, y);
+                        stream.showText("Comparison: " + cleanText(content.getComparisonTable().getTitle()));
+                        stream.endText();
+                        y -= 13;
+
+                        // Headers
+                        if (content.getComparisonTable().getHeaders() != null) {
+                            String headerLine = String.join(" | ", content.getComparisonTable().getHeaders());
+                            y = renderWrappedText(stream, fontBold, 9.0f, headerLine, margin + 18, y, 490);
+                        }
+                        // Rows
+                        if (content.getComparisonTable().getRows() != null) {
+                            for (java.util.List<String> row : content.getComparisonTable().getRows()) {
+                                if (y < 80) break;
+                                String rowLine = String.join(" | ", row);
+                                y = renderWrappedText(stream, fontRegular, 8.5f, "• " + rowLine, margin + 18, y, 490);
+                            }
+                        }
+                        if (content.getComparisonTable().getConclusion() != null && y > 80) {
+                            y = renderWrappedText(stream, fontOblique, 8.5f, "Takeaway: " + content.getComparisonTable().getConclusion(), margin + 18, y, 490);
+                        }
+                        y -= 8;
+                    }
+
                     // 3. Formula Box (if present)
                     if (content.getFormula() != null && y > 120) {
                         stream.beginText();

@@ -28,78 +28,75 @@ public class GeneralTheoryContentStrategy {
             String plannedDiagramType,
             List<String> requirements) {
 
-        DiagramDataDto diagram = diagramEngine.generateDiagram(topic, plannedDiagramType, overallPrompt);
+        DiagramDataDto diagram = diagramEngine.generateDiagram(topic, plannedDiagramType != null ? plannedDiagramType : "concept-map", overallPrompt);
 
         List<SectionDto> sections = new ArrayList<>();
+
+        // Section 1: Core Concept Breakdown
         sections.add(SectionDto.builder()
-                .heading("1. Core Principles & Foundational Architecture")
-                .content(topic + " is characterized by structured principles, established theoretical mechanisms, and practical applications.")
-                .badge("Foundations")
+                .heading("1. Essential Concepts & Working Mechanism")
+                .content(topic + " represents an essential academic and practical foundation with clear principles and systematic behavior:")
+                .badge("Fundamentals")
                 .bulletPoints(List.of(
-                        "Primary Objective: Systematic modeling and robust analytical understanding",
-                        "Key Concepts: Essential entities, relationships, and operational rules",
-                        "Practical Value: Real-world problem solving and domain implementation"
+                        "Core Purpose: Provides systematic methodology to understand, analyze, and solve core domain problems.",
+                        "Governing Rules: Relies on established mathematical, structural, or logical foundations.",
+                        "Real-World Impact: Directly applied in engineering, scientific modeling, and computational systems."
                 ))
-                .highlights(List.of("Systematic structure", "Domain principles", "Practical application"))
+                .highlights(List.of("Systematic structure", "Formal principles", "Practical application"))
                 .build());
 
+        // Section 2: Key Properties or Steps
         sections.add(SectionDto.builder()
-                .heading("2. Key Mechanisms & Operations")
-                .content("The core workflow of " + topic + " progresses through structured stages ensuring consistency and precision.")
-                .badge("Mechanisms")
+                .heading("2. Key Properties & Operational Workflow")
+                .content("To properly understand and apply " + topic + ", the following structured properties must be observed:")
+                .badge("Properties")
                 .bulletPoints(List.of(
-                        "Stage 1: Core foundation and initial conditions",
-                        "Stage 2: Operational dynamics and transformations",
-                        "Stage 3: Application, synthesis, and key outcomes"
+                        "Input / Preconditions: Well-defined starting parameters or state configurations.",
+                        "Processing / Behavior: Systematic transitions or algorithmic steps ensuring deterministic outcomes.",
+                        "Output / Verification: Clear evaluation criteria, correctness criteria, and results."
                 ))
-                .highlights(List.of("Foundation", "Operational dynamics", "Key outcomes"))
+                .highlights(List.of("Preconditions", "Processing", "Verification"))
                 .build());
 
+        // Concrete Example
         ExampleDto example = ExampleDto.builder()
-                .title("Practical Application Example")
-                .scenario("Application demonstration for " + topic)
+                .title("Applied Demonstration of " + topic)
+                .scenario("Step-by-step application of " + topic + " in a typical exam or practical scenario.")
+                .input("Standard configuration / test case for " + topic)
                 .stepByStep(List.of(
-                        "1. Identify core system parameters and context.",
-                        "2. Apply domain principles and rules methodically.",
-                        "3. Verify and interpret the final result."
+                        "1. Identify system inputs and initial parameters",
+                        "2. Execute the governing rules or transformations",
+                        "3. Verify consistency and observe the resulting state"
                 ))
-                .outputOrResult("Clear and validated practical outcome achieved.")
-                .takeaway("Consistent application of principles guarantees reliable results.")
+                .outputOrResult("Deterministic, valid outcome adhering to core rules.")
+                .takeaway("Consistent application of fundamental principles guarantees correct results.")
                 .build();
+
+        List<ExamTipDto> examTips = List.of(
+                ExamTipDto.builder()
+                        .tip("Exam Advice: Always begin by defining the core terminology clearly before detailing properties or drawing diagrams.")
+                        .commonMistake("Omitting boundary conditions or failing to label diagram elements clearly.")
+                        .mnemonic("D ➔ P ➔ E (Definition ➔ Properties ➔ Example)")
+                        .build()
+        );
 
         return PageContentDto.builder()
                 .documentTitle(topic)
                 .pageNumber(pageNumber)
                 .totalPages(totalPages)
                 .topicTitle(topic)
-                .topicSubtitle(focusArea != null ? focusArea : "Comprehensive Visual Study Guide")
-                .categoryBadge(audience != null ? audience : "Academic Notes")
-                .difficultyLevel(difficulty != null ? difficulty : "Intermediate")
-                .pagePartTitle(totalPages > 1 ? ("Part " + pageNumber + " of " + totalPages + ": Conceptual Overview") : "Complete Study Notes")
-                .definition(topic + " is an important academic topic with structured principles, operational frameworks, and wide practical applications.")
-                .mainIdea("Understand the core concepts, internal dynamics, and practical outcomes.")
-                .simpleExplanation("In simple terms, " + topic + " provides a clear, structured method to understand and solve domain problems.")
+                .topicSubtitle(focusArea != null ? focusArea : "Academic Concept & Examination Revision")
+                .categoryBadge("Study Notes")
+                .difficultyLevel(difficulty)
+                .definition(topic + " is an essential concept characterized by structured principles and practical importance.")
                 .sections(sections)
-                .diagram(diagram)
                 .example(example)
-                .advantages(List.of("Clear structured understanding", "Broad real-world application", "Consistent and predictable outcomes"))
-                .limitations(List.of("Requires foundational domain prerequisites", "Complexity increases with advanced use cases"))
+                .diagram(diagram)
+                .examTips(examTips)
                 .keyPoints(List.of(
-                        KeyPointDto.builder().point("Master the fundamental definitions and principles first.").starred(true).category("Rule").build(),
-                        KeyPointDto.builder().point("Study the visual relationships and diagrams to build strong intuition.").starred(true).category("Intuition").build()
+                        KeyPointDto.builder().point("Understand the foundational definition and underlying rules before approaching problem solving.").starred(true).category("Concept").build(),
+                        KeyPointDto.builder().point("Structure answers in exams with definition, key properties, diagrams, and a worked example.").starred(true).category("Exam").build()
                 ))
-                .examTips(List.of(
-                        ExamTipDto.builder().tip("In exams, define the topic clearly, draw labeled diagrams, and structure answers in numbered points.").mnemonic("Define ➔ Draw ➔ Detail").build()
-                ))
-                .quickTakeaways(List.of(
-                        "Master the definition & fundamental principles",
-                        "Review the visual diagram & core mechanisms",
-                        "Remember key takeaways & exam high-yield points"
-                ))
-                .continuesOnNextPage(pageNumber < totalPages)
-                .isContinuation(pageNumber > 1)
-                .layoutHint("handwritten-part1")
-                .styleTheme(style)
                 .build();
     }
 }

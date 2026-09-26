@@ -62,6 +62,16 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         
+        <div className="flex flex-col items-center justify-center pb-1 text-center">
+          <img
+            src="/logo-icon.png"
+            alt="AI Visual Notes Logo"
+            className="w-12 h-12 object-contain mb-1.5"
+          />
+          <span className="font-extrabold text-xs text-slate-800">AI Visual Notes</span>
+          <span className="text-[10px] font-bold text-blue-600">Handwritten Notes</span>
+        </div>
+
         {error && (
           <div className="p-2.5 rounded-lg bg-rose-50 border border-rose-200 text-rose-800 text-xs font-semibold">
             {error}

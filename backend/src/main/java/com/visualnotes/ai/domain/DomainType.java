@@ -13,6 +13,8 @@ public enum DomainType {
     CHEMISTRY("Chemistry & Chemical Engineering"),
     BIOLOGY("Biology & Life Sciences"),
     ELECTRONICS("Electronics & Digital Logic"),
+    THEORY_OF_COMPUTATION("Theory of Computation & Automata"),
+    SOFTWARE_ENGINEERING("Software Engineering & Architecture"),
     GENERAL_THEORY("General Academic Theory");
 
     private final String displayName;

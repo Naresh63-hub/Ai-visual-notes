@@ -54,9 +54,16 @@ export const HistoryDrawer: React.FC<HistoryDrawerProps> = ({
       >
         {/* Header */}
         <div className="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/70">
-          <div className="flex items-center gap-2">
-            <Clock className="w-5 h-5 text-indigo-600" />
-            <h3 className="font-extrabold text-base text-slate-900">Study Notes History</h3>
+          <div className="flex items-center gap-2.5">
+            <img
+              src="/logo-icon.png"
+              alt="AI Visual Notes Logo"
+              className="w-7 h-7 object-contain"
+            />
+            <div>
+              <h3 className="font-extrabold text-sm sm:text-base text-slate-900 leading-tight">My Notes</h3>
+              <p className="text-[10px] font-bold text-blue-600">AI Visual Notes</p>
+            </div>
           </div>
           <button
             onClick={onClose}

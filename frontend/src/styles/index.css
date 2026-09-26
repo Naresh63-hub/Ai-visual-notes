@@ -10,42 +10,75 @@
 
 /* Handwritten Realistic Notebook Paper Texture */
 .notebook-paper-ruled {
-  background-color: #fbf9f4;
-  background-image: linear-gradient(#e2e8f0 1px, transparent 1px);
+  background-color: #ffffff;
+  background-image: linear-gradient(#f1f5f9 1px, transparent 1px);
   background-size: 100% 28px;
   position: relative;
 }
 
-.notebook-paper-ruled::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 48px;
-  width: 2px;
-  background-color: rgba(248, 113, 113, 0.4);
-  pointer-events: none;
-}
-
-.notebook-paper-grid {
-  background-color: #fcfbf7;
-  background-image: 
-    linear-gradient(to right, rgba(226, 232, 240, 0.6) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(226, 232, 240, 0.6) 1px, transparent 1px);
-  background-size: 20px 20px;
+.notebook-paper-clean {
+  background-color: #ffffff;
+  position: relative;
 }
 
 /* College Handwritten Ink Styles */
 .ink-title-purple {
-  color: #701a75; /* Deep magenta/purple like handwritten titles in reference */
+  color: #172554;
 }
 
 .ink-section-red {
-  color: #b91c1c; /* Crimson red handwritten subheadings */
+  color: #1e3a8a;
 }
 
 .ink-body-blue {
-  color: #1e3a8a; /* Blue pen ink */
+  color: #1e3a8a; /* Dark blue handwritten ink */
+}
+
+.ink-dark-blue {
+  color: #172554;
+}
+
+.ink-section-blue {
+  color: #1e3a8a;
+  border-bottom: 2px solid #93c5fd;
+  display: inline-block;
+  padding-bottom: 2px;
+}
+
+.double-underline-blue {
+  border-bottom: 3px double #1e3a8a;
+  display: inline-block;
+  padding-bottom: 2px;
+}
+
+.wavy-underline-blue {
+  text-decoration: underline wavy #3b82f6 1.5px;
+  text-underline-offset: 3px;
+}
+
+.handwritten-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: 'Patrick Hand', 'Caveat', 'Kalam', cursive, sans-serif;
+}
+
+.handwritten-table th {
+  border-bottom: 2px solid #1e3a8a;
+  padding: 6px 10px;
+  text-align: left;
+  font-weight: bold;
+  color: #172554;
+  background-color: #f1f5f9;
+}
+
+.handwritten-table td {
+  border-bottom: 1px solid #e2e8f0;
+  padding: 6px 10px;
+  color: #1e3a8a;
+}
+
+.handwritten-table tr:hover td {
+  background-color: #f8fafc;
 }
 
 .ink-code-navy {
@@ -53,12 +86,12 @@
 }
 
 .wavy-underline-purple {
-  text-decoration: underline wavy #c026d3 2px;
+  text-decoration: underline wavy #3b82f6 2px;
   text-underline-offset: 4px;
 }
 
 .double-underline-purple {
-  border-bottom: 3px double #a21caf;
+  border-bottom: 3px double #1e3a8a;
   display: inline-block;
   padding-bottom: 2px;
 }

@@ -122,6 +122,13 @@ export interface ExamTip {
   mnemonic?: string;
 }
 
+export interface ComparisonTable {
+  title: string;
+  headers: string[];
+  rows: string[][];
+  conclusion?: string;
+}
+
 export interface DiagramData {
   type: string;
   title: string;
@@ -147,6 +154,7 @@ export interface PageContent {
   mainIdea?: string;
   simpleExplanation?: string;
   sections?: Section[];
+  comparisonTable?: ComparisonTable;
   algorithm?: AlgorithmStep[];
   pseudocode?: string;
   example?: Example;

@@ -19,9 +19,13 @@ export const RecentNotesList: React.FC<RecentNotesListProps> = ({
     <div className="w-full max-w-4xl mx-auto mt-12 pt-8 border-t border-slate-200">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <Clock className="w-4 h-4 text-indigo-600" />
+          <img
+            src="/logo-icon.png"
+            alt="AI Visual Notes Logo"
+            className="w-4 h-4 object-contain"
+          />
           <h2 className="text-sm font-bold text-slate-700 uppercase tracking-wider">
-            Recent Study Notes
+            Recent Notes
           </h2>
         </div>
         <span className="text-xs text-slate-400">{documents.length} saved</span>

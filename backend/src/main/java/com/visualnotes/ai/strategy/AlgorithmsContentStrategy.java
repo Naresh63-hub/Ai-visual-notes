@@ -206,8 +206,48 @@ public class AlgorithmsContentStrategy {
             }
         }
 
-        // Single page fallback
-        return generateGeneralAlgorithm("Binary Search", "Binary search algorithm", 1, 1, style, audience, difficulty, "Divide & Conquer Monotonic Search", "binary-search-array");
+        // Single page complete synthesis for Binary Search
+        List<AlgorithmStepDto> algorithm = new ArrayList<>();
+        algorithm.add(AlgorithmStepDto.builder().stepNumber(1).instruction("Set low = 0, high = n - 1").codeSnippet("low = 0; high = n - 1;").build());
+        algorithm.add(AlgorithmStepDto.builder().stepNumber(2).instruction("While low <= high, compute mid = low + (high - low)/2").codeSnippet("int mid = low + (high - low) / 2;").build());
+        algorithm.add(AlgorithmStepDto.builder().stepNumber(3).instruction("If arr[mid] == target, return mid; if arr[mid] < target, search right (low = mid + 1); else search left (high = mid - 1)").codeSnippet("if (arr[mid] < target) low = mid + 1; else high = mid - 1;").build());
+
+        ComplexityDto complexity = ComplexityDto.builder()
+                .timeBest("O(1)")
+                .timeAverage("O(log n)")
+                .timeWorst("O(log n)")
+                .space("O(1)")
+                .build();
+
+        ExampleDto example = ExampleDto.builder()
+                .title("Execution Trace: Key = 15")
+                .scenario("Sorted Array A = [2, 5, 7, 11, 15, 18, 21]")
+                .stepByStep(List.of(
+                        "Pass 1: low=0, high=6 ➔ mid=3 (Arr[3]=11 < 15) ⟹ low=4",
+                        "Pass 2: low=4, high=6 ➔ mid=5 (Arr[5]=18 > 15) ⟹ high=4",
+                        "Pass 3: low=4, high=4 ➔ mid=4 (Arr[4]=15 == 15) ⟹ MATCH FOUND!"
+                ))
+                .outputOrResult("Target 15 found at Index = 4 in 3 iterations!")
+                .build();
+
+        return PageContentDto.builder()
+                .documentTitle("Binary Search")
+                .pageNumber(1)
+                .totalPages(1)
+                .topicTitle("Binary Search")
+                .topicSubtitle("Divide & Conquer Monotonic Search Algorithm")
+                .categoryBadge("Algorithms ★★★")
+                .difficultyLevel(difficulty)
+                .definition("Binary Search is an optimal divide-and-conquer search algorithm on pre-sorted arrays that halves the search space at each iteration.")
+                .algorithm(algorithm)
+                .complexity(complexity)
+                .example(example)
+                .diagram(diagram)
+                .keyPoints(List.of(
+                        KeyPointDto.builder().point("Precondition: Array MUST be sorted.").starred(true).build(),
+                        KeyPointDto.builder().point("Prevents integer overflow by using low + (high - low)/2.").starred(true).build()
+                ))
+                .build();
     }
 
     private PageContentDto generateQuickSort(String topic, int pageNum, int totalPages, String style, String audience, String difficulty, boolean isMultiPage) {

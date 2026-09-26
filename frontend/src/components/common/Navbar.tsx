@@ -24,22 +24,21 @@ export const Navbar: React.FC<NavbarProps> = ({
         {/* Logo */}
         <div 
           onClick={onNewNotes}
-          className="flex items-center gap-2.5 cursor-pointer group"
+          className="flex items-center gap-2.5 cursor-pointer group select-none"
         >
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-purple-500 flex items-center justify-center text-white shadow-md shadow-indigo-500/20 group-hover:scale-105 transition-transform">
-            <BookOpen className="w-5 h-5" />
-          </div>
+          <img
+            src="/logo-icon.png"
+            alt="AI Visual Notes Icon"
+            className="w-9 h-9 sm:w-10 sm:h-10 object-contain group-hover:scale-105 transition-transform"
+          />
           <div>
-            <div className="flex items-center gap-1.5">
-              <span className="font-extrabold text-lg sm:text-xl tracking-tight bg-gradient-to-r from-slate-900 via-indigo-950 to-indigo-700 bg-clip-text text-transparent">
+            <div className="flex items-center gap-1.5 leading-none">
+              <span className="font-black text-lg sm:text-xl tracking-tight text-slate-900 group-hover:text-blue-600 transition-colors">
                 AI Visual Notes
               </span>
-              <span className="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-200/60 hidden xs:inline-block">
-                v2.0
-              </span>
             </div>
-            <p className="text-[11px] text-slate-500 font-medium hidden sm:block">
-              One Page = One Clean Visual Note
+            <p className="text-[11px] text-blue-600 font-semibold tracking-wide hidden sm:block mt-0.5">
+              Handwritten Notes
             </p>
           </div>
         </div>

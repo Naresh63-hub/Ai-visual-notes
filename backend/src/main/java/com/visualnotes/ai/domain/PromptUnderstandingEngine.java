@@ -207,6 +207,22 @@ public class PromptUnderstandingEngine {
                 || lower.contains("handshake") || lower.contains("routing")) {
             return DomainType.COMPUTER_NETWORKS;
         }
+        if (lower.contains("nfa") || lower.contains("dfa") || lower.contains("automata")
+                || lower.contains("turing machine") || lower.contains("regular expression") || lower.contains("cfg")
+                || lower.contains("context free") || lower.contains("pda") || lower.contains("pushdown") || lower.contains("chomsky")
+                || lower.contains("theory of computation") || lower.contains("toc")) {
+            return DomainType.THEORY_OF_COMPUTATION;
+        }
+        if (lower.contains("process scheduling") || lower.contains("scheduling") || lower.contains("deadlock") || lower.contains("paging") || lower.contains("virtual memory")
+                || lower.contains("semaphore") || lower.contains("operating system") || lower.contains("mutex") || lower.contains("thread")
+                || lower.contains("fcfs") || lower.contains("sjf") || lower.contains("round robin") || lower.contains("cpu scheduling") || lower.contains("gantt")) {
+            return DomainType.OPERATING_SYSTEMS;
+        }
+        if (lower.contains("ohm's law") || lower.contains("ohms law") || lower.contains("diode") || lower.contains("transistor") || lower.matches(".*\\b(bjt|fet|kcl|kvl)\\b.*")
+                || lower.contains("logic gate") || lower.contains("op amp") || lower.contains("circuit") || lower.contains("kirchhoff")
+                || lower.contains("electronics") || lower.contains("semiconductor")) {
+            return DomainType.ELECTRONICS;
+        }
         if (lower.contains("binary search") || lower.contains("quick sort") || lower.contains("merge sort") || lower.matches(".*\\b(daa|bfs|dfs)\\b.*")
                 || lower.contains("breadth first") || lower.contains("depth first")
                 || lower.contains("dijkstra") || lower.contains("dynamic programming")
@@ -223,15 +239,6 @@ public class PromptUnderstandingEngine {
                 || lower.contains("machine learning") || lower.contains("transformer") || lower.contains("attention") || lower.matches(".*\\b(svm|ai|ml)\\b.*")
                 || lower.contains("linear regression") || lower.contains("logistic regression")) {
             return DomainType.AI_ML;
-        }
-        if (lower.contains("process scheduling") || lower.contains("deadlock") || lower.contains("paging") || lower.contains("virtual memory")
-                || lower.contains("semaphore") || lower.contains("operating system") || lower.contains("mutex") || lower.contains("thread")) {
-            return DomainType.OPERATING_SYSTEMS;
-        }
-        if (lower.contains("ohm's law") || lower.contains("ohms law") || lower.contains("diode") || lower.contains("transistor") || lower.matches(".*\\b(bjt|fet|kcl|kvl)\\b.*")
-                || lower.contains("logic gate") || lower.contains("op amp") || lower.contains("circuit") || lower.contains("kirchhoff")
-                || lower.contains("electronics") || lower.contains("semiconductor")) {
-            return DomainType.ELECTRONICS;
         }
         return DomainType.GENERAL_THEORY;
     }

@@ -99,10 +99,15 @@ public class OpenAiProvider implements AIProvider {
             requestBody.put("model", model);
             requestBody.put("response_format", Map.of("type", "json_object"));
 
-            String systemPrompt = "You are an expert visual study notes generator for students. " +
-                    "Generate structured JSON notes for topic: '" + topic + "'. " +
-                    "Style: " + style + ", Audience: " + audience + ", Difficulty: " + difficulty + ". " +
-                    "Include: definition, simpleExplanation, sections, algorithm, example, formula, complexity, keyPoints, examTips.";
+            String systemPrompt = "You are an expert pedagogical study-notes generator. " +
+                    "Generate clean, highly relevant JSON study notes for the topic: '" + topic + "'. " +
+                    "Audience: " + audience + ", Difficulty: " + difficulty + ". " +
+                    "Only include educational components genuinely relevant to this topic. " +
+                    "Possible fields: topicTitle, definition, simpleExplanation, sections (title, content, bulletPoints), " +
+                    "comparisonTable (title, headers, rows, conclusion - for comparisons), formula (title, latex, explanation, variables), " +
+                    "algorithm (title, steps), pseudocode, example (title, problem, stepByStepSolution, result), " +
+                    "keyPoints (point, whyImportant), examTips (tip, commonMistake, mnemonic). " +
+                    "Do NOT include irrelevant components (e.g. no algorithms for pure physics laws, no formulas if purely conceptual, no comparison table if single topic).";
 
             requestBody.put("messages", List.of(
                     Map.of("role", "system", "content", systemPrompt),

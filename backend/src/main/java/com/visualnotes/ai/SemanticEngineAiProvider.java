@@ -27,6 +27,8 @@ public class SemanticEngineAiProvider implements AIProvider {
     private final NetworkingContentStrategy networkingStrategy;
     private final AiMlContentStrategy aiMlStrategy;
     private final AlgorithmsContentStrategy algorithmsStrategy;
+    private final AutomataContentStrategy automataStrategy;
+    private final OperatingSystemsContentStrategy operatingSystemsStrategy;
     private final GeneralTheoryContentStrategy generalStrategy;
 
     public SemanticEngineAiProvider(
@@ -40,6 +42,8 @@ public class SemanticEngineAiProvider implements AIProvider {
             NetworkingContentStrategy networkingStrategy,
             AiMlContentStrategy aiMlStrategy,
             AlgorithmsContentStrategy algorithmsStrategy,
+            AutomataContentStrategy automataStrategy,
+            OperatingSystemsContentStrategy operatingSystemsStrategy,
             GeneralTheoryContentStrategy generalStrategy) {
         this.diagramEngine = diagramEngine;
         this.promptUnderstandingEngine = promptUnderstandingEngine;
@@ -51,6 +55,8 @@ public class SemanticEngineAiProvider implements AIProvider {
         this.networkingStrategy = networkingStrategy;
         this.aiMlStrategy = aiMlStrategy;
         this.algorithmsStrategy = algorithmsStrategy;
+        this.automataStrategy = automataStrategy;
+        this.operatingSystemsStrategy = operatingSystemsStrategy;
         this.generalStrategy = generalStrategy;
     }
 
@@ -202,6 +208,12 @@ public class SemanticEngineAiProvider implements AIProvider {
         PageContentDto content;
 
         switch (domain) {
+            case THEORY_OF_COMPUTATION:
+                content = automataStrategy.generate(topic, overallPrompt, pageNumber, totalPages, style, audience, difficulty, focusArea, plannedDiagramType, analysis.getRequirements());
+                break;
+            case OPERATING_SYSTEMS:
+                content = operatingSystemsStrategy.generate(topic, overallPrompt, pageNumber, totalPages, style, audience, difficulty, focusArea, plannedDiagramType, analysis.getRequirements());
+                break;
             case PHYSICS:
             case ELECTRONICS:
                 content = physicsStrategy.generate(topic, overallPrompt, pageNumber, totalPages, style, audience, difficulty, focusArea, plannedDiagramType, analysis.getRequirements());
@@ -273,6 +285,10 @@ public class SemanticEngineAiProvider implements AIProvider {
 
     private String deriveDiagramType(String topic, DomainType domain) {
         String l = topic.toLowerCase();
+        if (domain == DomainType.THEORY_OF_COMPUTATION || l.contains("nfa") || l.contains("dfa") || l.contains("automata")) return "automata-state-transition";
+        if (domain == DomainType.OPERATING_SYSTEMS || l.contains("scheduling") || l.contains("gantt") || l.contains("round robin") || l.contains("fcfs") || l.contains("sjf")) return "os-gantt-chart";
+        if (l.contains("sql") || l.contains("join")) return "sql-join-venn";
+        if (l.contains("ohm") || l.contains("resistor") || l.contains("circuit")) return "circuit-schematic";
         if (domain == DomainType.PHYSICS || l.contains("newton") || l.contains("force")) return "physics-diagram";
         if (domain == DomainType.BIOLOGY || l.contains("photosynthesis") || l.contains("cell")) return "science-reaction";
         if (domain == DomainType.DBMS || l.contains("normalization") || l.contains("database")) return "dbms-normalization";

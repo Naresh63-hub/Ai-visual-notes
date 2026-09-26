@@ -76,6 +76,26 @@ public class DiagramEngine {
             title = "Newton's 3 Laws of Motion Physical Mechanics";
             caption = "1st: Inertia (ΣF = 0) | 2nd: Force Law (F = m·a) | 3rd: Action-Reaction (F_AB = -F_BA)";
             rawSvg = generateNewtonSvg();
+        } else if (lowerTopic.contains("nfa") || lowerTopic.contains("dfa") || lowerTopic.contains("automata") || type.contains("automata")) {
+            type = "automata-state-transition";
+            title = "Automata State Transition Diagram (DFA / NFA)";
+            caption = "Deterministic δ(q, a) ∈ Q vs Nondeterministic δ(q, a) ∈ 2^Q State Transitions & Accept States.";
+            rawSvg = generateAutomataSvg();
+        } else if (lowerTopic.contains("sql") || lowerTopic.contains("join") || type.contains("sql-join")) {
+            type = "sql-join-venn";
+            title = "SQL Relational JOINs Venn & Set Operations";
+            caption = "Comparison of INNER JOIN, LEFT JOIN, RIGHT JOIN, and FULL OUTER JOIN with NULL fill behaviors.";
+            rawSvg = generateSqlJoinSvg();
+        } else if (lowerTopic.contains("gantt") || lowerTopic.contains("scheduling") || lowerTopic.contains("round robin") || lowerTopic.contains("fcfs") || lowerTopic.contains("sjf") || type.contains("os-gantt")) {
+            type = "os-gantt-chart";
+            title = "CPU Scheduling Gantt Chart & Turnaround/Waiting Timeline";
+            caption = "Process burst slices, context switching timeline, Completion Time (CT), TAT = CT - AT, WT = TAT - BT.";
+            rawSvg = generateOsGanttChartSvg();
+        } else if (lowerTopic.contains("ohm") || lowerTopic.contains("circuit") || lowerTopic.contains("resistor") || type.contains("circuit")) {
+            type = "circuit-schematic";
+            title = "Ohm's Law Closed DC Circuit Schematic & I-V Linear Characteristic";
+            caption = "Direct proportionality: V = I · R across an Ohmic conductor where slope of I vs V is 1/R.";
+            rawSvg = generateOhmsLawSvg();
         } else if (lowerTopic.contains("handshake") || lowerTopic.contains("tcp")) {
             type = "process-steps";
             title = "TCP 3-Way Handshake Connection Protocol";
@@ -104,13 +124,17 @@ public class DiagramEngine {
             return specificType;
         }
         String combined = (topic + " " + context).toLowerCase();
+        if (combined.contains("nfa") || combined.contains("dfa") || combined.contains("automata")) return "automata-state-transition";
+        if (combined.contains("join") || combined.contains("sql")) return "sql-join-venn";
+        if (combined.contains("scheduling") || combined.contains("gantt") || combined.contains("round robin") || combined.contains("fcfs") || combined.contains("sjf")) return "os-gantt-chart";
+        if (combined.contains("ohm") || combined.contains("resistor") || combined.contains("circuit")) return "circuit-schematic";
         if (combined.contains("binary search") || combined.contains("array") || combined.contains("search")) return "binary-search-array";
         if (combined.contains("quick sort") || combined.contains("merge sort") || combined.contains("sort")) return "sorting-partition";
         if (combined.contains("bfs") || combined.contains("tree") || combined.contains("heap") || combined.contains("binary tree")) return "tree-traversal";
         if (combined.contains("dfs") || combined.contains("graph")) return "graph-network";
         if (combined.contains("dijkstra") || combined.contains("shortest path")) return "graph-network";
         if (combined.contains("osi") || combined.contains("layer") || combined.contains("tcp/ip")) return "layer-stack";
-        if (combined.contains("dbms") || combined.contains("normalization") || combined.contains("sql") || combined.contains("relational")) return "dbms-normalization";
+        if (combined.contains("dbms") || combined.contains("normalization") || combined.contains("relational")) return "dbms-normalization";
         if (combined.contains("neural") || combined.contains("machine learning") || combined.contains("gradient descent") || combined.contains("ai")) return "neural-network";
         if (combined.contains("photosynthesis") || combined.contains("biology") || combined.contains("cell")) return "science-reaction";
         if (combined.contains("newton") || combined.contains("physics") || combined.contains("force") || combined.contains("motion")) return "physics-diagram";
@@ -432,6 +456,128 @@ public class DiagramEngine {
                 "<line x1=\"360\" y1=\"78\" x2=\"440\" y2=\"108\" stroke=\"#94a3b8\" stroke-width=\"1.5\"/>" +
                 "<rect x=\"440\" y=\"92\" width=\"120\" height=\"30\" rx=\"5\" fill=\"#faf5ff\" stroke=\"#a855f7\"/>" +
                 "<text x=\"500\" y=\"112\" font-size=\"10\" font-weight=\"bold\" fill=\"#6b21a8\" text-anchor=\"middle\">4. Complexity &amp; Exams</text>" +
+                "</svg>";
+    }
+
+    private String generateAutomataSvg() {
+        return "<svg viewBox=\"0 0 580 150\" xmlns=\"http://www.w3.org/2000/svg\" class=\"w-full h-auto\">" +
+                "<rect width=\"580\" height=\"150\" rx=\"8\" fill=\"#f8fafc\" stroke=\"#cbd5e1\" stroke-width=\"1.5\"/>" +
+                "<path d=\"M 30 75 L 70 75\" stroke=\"#1e3a8a\" stroke-width=\"2\"/>" +
+                "<polygon points=\"73,75 63,70 63,80\" fill=\"#1e3a8a\"/>" +
+                "<text x=\"45\" y=\"68\" font-family=\"'Patrick Hand', 'Caveat', cursive, sans-serif\" font-size=\"12\" font-weight=\"bold\" fill=\"#1e3a8a\">Start</text>" +
+                "<circle cx=\"95\" cy=\"75\" r=\"22\" fill=\"#eff6ff\" stroke=\"#1e3a8a\" stroke-width=\"2\"/>" +
+                "<text x=\"95\" y=\"80\" font-family=\"'Patrick Hand', 'Caveat', cursive, sans-serif\" font-size=\"14\" font-weight=\"bold\" fill=\"#172554\" text-anchor=\"middle\">q₀</text>" +
+                "<path d=\"M 85 55 C 80 25, 110 25, 105 55\" stroke=\"#1e3a8a\" stroke-width=\"1.8\" fill=\"none\"/>" +
+                "<text x=\"95\" y=\"28\" font-family=\"'Patrick Hand', cursive, sans-serif\" font-size=\"12\" font-weight=\"bold\" fill=\"#1e3a8a\" text-anchor=\"middle\">0</text>" +
+                "<path d=\"M 117 75 L 213 75\" stroke=\"#1e3a8a\" stroke-width=\"2\" fill=\"none\"/>" +
+                "<polygon points=\"215,75 205,70 205,80\" fill=\"#1e3a8a\"/>" +
+                "<text x=\"165\" y=\"68\" font-family=\"'Patrick Hand', cursive, sans-serif\" font-size=\"13\" font-weight=\"bold\" fill=\"#1e3a8a\" text-anchor=\"middle\">1</text>" +
+                "<circle cx=\"235\" cy=\"75\" r=\"22\" fill=\"#eff6ff\" stroke=\"#1e3a8a\" stroke-width=\"2\"/>" +
+                "<text x=\"235\" y=\"80\" font-family=\"'Patrick Hand', 'Caveat', cursive, sans-serif\" font-size=\"14\" font-weight=\"bold\" fill=\"#172554\" text-anchor=\"middle\">q₁</text>" +
+                "<path d=\"M 257 75 L 353 75\" stroke=\"#1e3a8a\" stroke-width=\"2\" fill=\"none\"/>" +
+                "<polygon points=\"355,75 345,70 345,80\" fill=\"#1e3a8a\"/>" +
+                "<text x=\"305\" y=\"68\" font-family=\"'Patrick Hand', cursive, sans-serif\" font-size=\"13\" font-weight=\"bold\" fill=\"#1e3a8a\" text-anchor=\"middle\">0, 1</text>" +
+                "<circle cx=\"375\" cy=\"75\" r=\"22\" fill=\"#dbeafe\" stroke=\"#1e3a8a\" stroke-width=\"2\"/>" +
+                "<circle cx=\"375\" cy=\"75\" r=\"17\" fill=\"none\" stroke=\"#1e3a8a\" stroke-width=\"1.8\"/>" +
+                "<text x=\"375\" y=\"80\" font-family=\"'Patrick Hand', 'Caveat', cursive, sans-serif\" font-size=\"14\" font-weight=\"bold\" fill=\"#172554\" text-anchor=\"middle\">q₂ (F)</text>" +
+                "<g transform=\"translate(420, 25)\">" +
+                "  <rect x=\"0\" y=\"0\" width=\"145\" height=\"100\" rx=\"5\" fill=\"#f1f5f9\" stroke=\"#94a3b8\" stroke-dasharray=\"3 2\"/>" +
+                "  <text x=\"72\" y=\"20\" font-family=\"sans-serif\" font-size=\"11\" font-weight=\"bold\" fill=\"#1e3a8a\" text-anchor=\"middle\">Transition Models</text>" +
+                "  <text x=\"10\" y=\"42\" font-family=\"'Patrick Hand', cursive, sans-serif\" font-size=\"12\" fill=\"#334155\">• DFA: δ(q, a) ∈ Q</text>" +
+                "  <text x=\"10\" y=\"62\" font-family=\"'Patrick Hand', cursive, sans-serif\" font-size=\"12\" fill=\"#334155\">  (Deterministic 1 path)</text>" +
+                "  <text x=\"10\" y=\"82\" font-family=\"'Patrick Hand', cursive, sans-serif\" font-size=\"12\" fill=\"#334155\">• NFA: δ(q, a) ∈ 2^Q</text>" +
+                "</g>" +
+                "<text x=\"240\" y=\"132\" font-family=\"'Patrick Hand', cursive, sans-serif\" font-size=\"12\" font-weight=\"bold\" fill=\"#1e3a8a\" text-anchor=\"middle\">Automata State Transition Diagram (Language L = strings ending in '10' or '11')</text>" +
+                "</svg>";
+    }
+
+    private String generateSqlJoinSvg() {
+        return "<svg viewBox=\"0 0 580 150\" xmlns=\"http://www.w3.org/2000/svg\" class=\"w-full h-auto\">" +
+                "<rect width=\"580\" height=\"150\" rx=\"8\" fill=\"#f8fafc\" stroke=\"#cbd5e1\" stroke-width=\"1.5\"/>" +
+                "<g transform=\"translate(20, 15)\">" +
+                "  <circle cx=\"45\" cy=\"45\" r=\"30\" fill=\"#f1f5f9\" stroke=\"#1e3a8a\" stroke-width=\"1.5\"/>" +
+                "  <circle cx=\"75\" cy=\"45\" r=\"30\" fill=\"#f1f5f9\" stroke=\"#1e3a8a\" stroke-width=\"1.5\"/>" +
+                "  <path d=\"M 60 21 A 30 30 0 0 1 60 69 A 30 30 0 0 1 60 21\" fill=\"#93c5fd\" stroke=\"#1e3a8a\" stroke-width=\"1.5\"/>" +
+                "  <text x=\"60\" y=\"95\" font-family=\"'Patrick Hand', cursive, sans-serif\" font-size=\"12\" font-weight=\"bold\" fill=\"#1e3a8a\" text-anchor=\"middle\">INNER JOIN</text>" +
+                "  <text x=\"60\" y=\"110\" font-family=\"sans-serif\" font-size=\"10\" fill=\"#64748b\" text-anchor=\"middle\">A ∩ B (Matched only)</text>" +
+                "</g>" +
+                "<g transform=\"translate(155, 15)\">" +
+                "  <circle cx=\"45\" cy=\"45\" r=\"30\" fill=\"#93c5fd\" stroke=\"#1e3a8a\" stroke-width=\"1.5\"/>" +
+                "  <circle cx=\"75\" cy=\"45\" r=\"30\" fill=\"#f1f5f9\" stroke=\"#1e3a8a\" stroke-width=\"1.5\"/>" +
+                "  <text x=\"60\" y=\"95\" font-family=\"'Patrick Hand', cursive, sans-serif\" font-size=\"12\" font-weight=\"bold\" fill=\"#1e3a8a\" text-anchor=\"middle\">LEFT JOIN</text>" +
+                "  <text x=\"60\" y=\"110\" font-family=\"sans-serif\" font-size=\"10\" fill=\"#64748b\" text-anchor=\"middle\">All A + Matched B</text>" +
+                "</g>" +
+                "<g transform=\"translate(290, 15)\">" +
+                "  <circle cx=\"45\" cy=\"45\" r=\"30\" fill=\"#f1f5f9\" stroke=\"#1e3a8a\" stroke-width=\"1.5\"/>" +
+                "  <circle cx=\"75\" cy=\"45\" r=\"30\" fill=\"#93c5fd\" stroke=\"#1e3a8a\" stroke-width=\"1.5\"/>" +
+                "  <text x=\"60\" y=\"95\" font-family=\"'Patrick Hand', cursive, sans-serif\" font-size=\"12\" font-weight=\"bold\" fill=\"#1e3a8a\" text-anchor=\"middle\">RIGHT JOIN</text>" +
+                "  <text x=\"60\" y=\"110\" font-family=\"sans-serif\" font-size=\"10\" fill=\"#64748b\" text-anchor=\"middle\">All B + Matched A</text>" +
+                "</g>" +
+                "<g transform=\"translate(425, 15)\">" +
+                "  <circle cx=\"45\" cy=\"45\" r=\"30\" fill=\"#93c5fd\" stroke=\"#1e3a8a\" stroke-width=\"1.5\"/>" +
+                "  <circle cx=\"75\" cy=\"45\" r=\"30\" fill=\"#93c5fd\" stroke=\"#1e3a8a\" stroke-width=\"1.5\"/>" +
+                "  <text x=\"60\" y=\"95\" font-family=\"'Patrick Hand', cursive, sans-serif\" font-size=\"12\" font-weight=\"bold\" fill=\"#1e3a8a\" text-anchor=\"middle\">FULL JOIN</text>" +
+                "  <text x=\"60\" y=\"110\" font-family=\"sans-serif\" font-size=\"10\" fill=\"#64748b\" text-anchor=\"middle\">A ∪ B (NULL on missing)</text>" +
+                "</g>" +
+                "<text x=\"290\" y=\"140\" font-family=\"'Patrick Hand', cursive, sans-serif\" font-size=\"11\" font-weight=\"bold\" fill=\"#1e3a8a\" text-anchor=\"middle\">Relational Join Set-Theoretic Algebra &amp; Venn Mappings</text>" +
+                "</svg>";
+    }
+
+    private String generateOsGanttChartSvg() {
+        return "<svg viewBox=\"0 0 580 150\" xmlns=\"http://www.w3.org/2000/svg\" class=\"w-full h-auto\">" +
+                "<rect width=\"580\" height=\"150\" rx=\"8\" fill=\"#f8fafc\" stroke=\"#cbd5e1\" stroke-width=\"1.5\"/>" +
+                "<text x=\"290\" y=\"22\" font-family=\"'Patrick Hand', 'Caveat', cursive, sans-serif\" font-size=\"14\" font-weight=\"bold\" fill=\"#172554\" text-anchor=\"middle\">CPU Scheduling Execution Timeline (Gantt Chart)</text>" +
+                "<g transform=\"translate(40, 38)\">" +
+                "  <rect x=\"0\" y=\"0\" width=\"120\" height=\"40\" fill=\"#dbeafe\" stroke=\"#1e3a8a\" stroke-width=\"2\"/>" +
+                "  <text x=\"60\" y=\"25\" font-family=\"'Patrick Hand', cursive, sans-serif\" font-size=\"14\" font-weight=\"bold\" fill=\"#1e3a8a\" text-anchor=\"middle\">P1 (BT=6)</text>" +
+                "  <rect x=\"120\" y=\"0\" width=\"150\" height=\"40\" fill=\"#eff6ff\" stroke=\"#1e3a8a\" stroke-width=\"2\"/>" +
+                "  <text x=\"195\" y=\"25\" font-family=\"'Patrick Hand', cursive, sans-serif\" font-size=\"14\" font-weight=\"bold\" fill=\"#1e3a8a\" text-anchor=\"middle\">P2 (BT=8)</text>" +
+                "  <rect x=\"270\" y=\"0\" width=\"130\" height=\"40\" fill=\"#dbeafe\" stroke=\"#1e3a8a\" stroke-width=\"2\"/>" +
+                "  <text x=\"335\" y=\"25\" font-family=\"'Patrick Hand', cursive, sans-serif\" font-size=\"14\" font-weight=\"bold\" fill=\"#1e3a8a\" text-anchor=\"middle\">P3 (BT=7)</text>" +
+                "  <rect x=\"400\" y=\"0\" width=\"90\" height=\"40\" fill=\"#eff6ff\" stroke=\"#1e3a8a\" stroke-width=\"2\"/>" +
+                "  <text x=\"445\" y=\"25\" font-family=\"'Patrick Hand', cursive, sans-serif\" font-size=\"14\" font-weight=\"bold\" fill=\"#1e3a8a\" text-anchor=\"middle\">P4 (BT=3)</text>" +
+                "  <text x=\"0\" y=\"58\" font-family=\"monospace\" font-size=\"12\" font-weight=\"bold\" fill=\"#1e3a8a\" text-anchor=\"middle\">0</text>" +
+                "  <text x=\"120\" y=\"58\" font-family=\"monospace\" font-size=\"12\" font-weight=\"bold\" fill=\"#1e3a8a\" text-anchor=\"middle\">6</text>" +
+                "  <text x=\"270\" y=\"58\" font-family=\"monospace\" font-size=\"12\" font-weight=\"bold\" fill=\"#1e3a8a\" text-anchor=\"middle\">14</text>" +
+                "  <text x=\"400\" y=\"58\" font-family=\"monospace\" font-size=\"12\" font-weight=\"bold\" fill=\"#1e3a8a\" text-anchor=\"middle\">21</text>" +
+                "  <text x=\"490\" y=\"58\" font-family=\"monospace\" font-size=\"12\" font-weight=\"bold\" fill=\"#1e3a8a\" text-anchor=\"middle\">24 ms</text>" +
+                "</g>" +
+                "<g transform=\"translate(40, 112)\">" +
+                "  <rect x=\"0\" y=\"0\" width=\"490\" height=\"28\" rx=\"4\" fill=\"#f1f5f9\" stroke=\"#94a3b8\"/>" +
+                "  <text x=\"245\" y=\"19\" font-family=\"'Patrick Hand', cursive, sans-serif\" font-size=\"12\" font-weight=\"bold\" fill=\"#172554\" text-anchor=\"middle\">Key Formulas: Turnaround Time (TAT) = CT − AT | Waiting Time (WT) = TAT − BT</text>" +
+                "</g>" +
+                "</svg>";
+    }
+
+    private String generateOhmsLawSvg() {
+        return "<svg viewBox=\"0 0 580 150\" xmlns=\"http://www.w3.org/2000/svg\" class=\"w-full h-auto\">" +
+                "<rect width=\"580\" height=\"150\" rx=\"8\" fill=\"#f8fafc\" stroke=\"#cbd5e1\" stroke-width=\"1.5\"/>" +
+                "<g transform=\"translate(30, 20)\">" +
+                "  <rect x=\"20\" y=\"20\" width=\"200\" height=\"80\" fill=\"none\" stroke=\"#1e3a8a\" stroke-width=\"2\"/>" +
+                "  <line x1=\"20\" y1=\"20\" x2=\"20\" y2=\"100\" stroke=\"#f8fafc\" stroke-width=\"4\"/>" +
+                "  <circle cx=\"20\" cy=\"60\" r=\"16\" fill=\"#eff6ff\" stroke=\"#1e3a8a\" stroke-width=\"2\"/>" +
+                "  <text x=\"20\" y=\"64\" font-family=\"sans-serif\" font-size=\"12\" font-weight=\"bold\" fill=\"#1e3a8a\" text-anchor=\"middle\">V</text>" +
+                "  <text x=\"5\" y=\"50\" font-size=\"11\" font-weight=\"bold\" fill=\"#16a34a\">+</text>" +
+                "  <text x=\"5\" y=\"78\" font-size=\"11\" font-weight=\"bold\" fill=\"#dc2626\">−</text>" +
+                "  <line x1=\"80\" y1=\"12\" x2=\"130\" y2=\"12\" stroke=\"#1e3a8a\" stroke-width=\"2\"/>" +
+                "  <polygon points=\"133,12 125,8 125,16\" fill=\"#1e3a8a\"/>" +
+                "  <text x=\"105\" y=\"8\" font-family=\"'Patrick Hand', cursive, sans-serif\" font-size=\"12\" font-weight=\"bold\" fill=\"#1e3a8a\" text-anchor=\"middle\">Current I →</text>" +
+                "  <line x1=\"220\" y1=\"40\" x2=\"220\" y2=\"80\" stroke=\"#f8fafc\" stroke-width=\"4\"/>" +
+                "  <path d=\"M 220 40 L 210 46 L 230 54 L 210 62 L 230 70 L 220 76 L 220 80\" stroke=\"#1e3a8a\" stroke-width=\"2\" fill=\"none\"/>" +
+                "  <text x=\"245\" y=\"64\" font-family=\"sans-serif\" font-size=\"12\" font-weight=\"bold\" fill=\"#1e3a8a\">R (Ω)</text>" +
+                "  <text x=\"120\" y=\"120\" font-family=\"'Patrick Hand', cursive, sans-serif\" font-size=\"12\" font-weight=\"bold\" fill=\"#1e3a8a\" text-anchor=\"middle\">Closed DC Circuit: V = I · R</text>" +
+                "</g>" +
+                "<g transform=\"translate(320, 20)\">" +
+                "  <line x1=\"40\" y1=\"100\" x2=\"210\" y2=\"100\" stroke=\"#1e3a8a\" stroke-width=\"2\"/>" +
+                "  <polygon points=\"213,100 205,96 205,104\" fill=\"#1e3a8a\"/>" +
+                "  <text x=\"215\" y=\"104\" font-family=\"sans-serif\" font-size=\"11\" font-weight=\"bold\" fill=\"#1e3a8a\">V</text>" +
+                "  <line x1=\"40\" y1=\"100\" x2=\"40\" y2=\"15\" stroke=\"#1e3a8a\" stroke-width=\"2\"/>" +
+                "  <polygon points=\"40,12 36,20 44,20\" fill=\"#1e3a8a\"/>" +
+                "  <text x=\"38\" y=\"8\" font-family=\"sans-serif\" font-size=\"11\" font-weight=\"bold\" fill=\"#1e3a8a\">I</text>" +
+                "  <line x1=\"40\" y1=\"100\" x2=\"190\" y2=\"25\" stroke=\"#2563eb\" stroke-width=\"2.5\"/>" +
+                "  <text x=\"165\" y=\"40\" font-family=\"'Patrick Hand', cursive, sans-serif\" font-size=\"12\" font-weight=\"bold\" fill=\"#1e40af\">Slope = 1/R</text>" +
+                "  <text x=\"125\" y=\"120\" font-family=\"'Patrick Hand', cursive, sans-serif\" font-size=\"12\" font-weight=\"bold\" fill=\"#1e3a8a\" text-anchor=\"middle\">Linear I-V Characteristic</text>" +
+                "</g>" +
                 "</svg>";
     }
 

@@ -135,20 +135,26 @@ export const HeroPromptInput: React.FC<HeroPromptInputProps> = ({
       
       {/* Hero Header */}
       <div className="text-center mb-8 sm:mb-10">
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-purple-50 border border-purple-200/80 text-purple-700 text-xs sm:text-sm font-semibold mb-4 shadow-sm">
-          <Sparkles className="w-4 h-4 text-purple-600 animate-pulse" />
-          <span>Academic Handwritten Notes & Topic Architecture Engine</span>
+        <div className="flex justify-center mb-4">
+          <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-blue-50/90 border border-blue-200/80 text-blue-800 text-xs sm:text-sm font-bold shadow-sm backdrop-blur-xs">
+            <img
+              src="/logo-icon.png"
+              alt="AI Visual Notes Logo"
+              className="w-5 h-5 object-contain"
+            />
+            <span>AI Visual Notes — Handwritten Notes</span>
+          </div>
         </div>
-        <h1 className="text-3xl sm:text-5xl font-extrabold text-slate-900 tracking-tight leading-tight sm:leading-tight">
-          Turn <span className="bg-gradient-to-r from-purple-600 via-indigo-600 to-pink-600 bg-clip-text text-transparent">Any Study Topic</span> Into Authentic Visual Notes
+        <h1 className="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight leading-tight sm:leading-tight">
+          Turn Any Topic Into <span className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">Clear Notes</span>
         </h1>
-        <p className="mt-3 text-sm sm:text-base text-slate-600 max-w-2xl mx-auto">
-          Generates comprehensive, multi-page handwritten notes with purple underlined headings, crimson subheadings, boxed pseudocode, step-by-step traces, complexity proofs, and crisp vector diagrams.
+        <p className="mt-3 text-sm sm:text-base text-slate-600 max-w-2xl mx-auto font-medium">
+          Generates comprehensive handwritten visual notes with structured topics, key concepts, formulas, algorithms, step-by-step traces, and clean diagrams.
         </p>
       </div>
 
       {/* Main Input Box */}
-      <div className="bg-white rounded-2xl shadow-xl shadow-slate-200/60 border border-slate-200/90 p-4 sm:p-6 transition-all focus-within:border-indigo-500 focus-within:ring-4 focus-within:ring-indigo-500/10">
+      <div className="bg-white rounded-2xl shadow-xl shadow-slate-200/60 border border-slate-200/90 p-4 sm:p-6 transition-all focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-500/10">
         <form onSubmit={handleSubmit}>
           
           <div className="relative">
@@ -156,7 +162,7 @@ export const HeroPromptInput: React.FC<HeroPromptInputProps> = ({
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Paste your topic, question, or syllabus here...&#10;&#10;Examples:&#10;• &quot;Explain Binary Search with algorithm, example, complexity and diagram.&quot;&#10;• &quot;Explain BFS, DFS, Merge Sort, and Quick Sort in 3 pages with diagrams.&quot;&#10;• &quot;Explain Photosynthesis with labeled diagram for high school exams.&quot;"
+              placeholder="What do you want to study?&#10;&#10;Examples:&#10;• &quot;Explain Binary Search with algorithm, example, complexity and diagram.&quot;&#10;• &quot;Newton's 3 Laws of Motion with vector equations and everyday examples.&quot;&#10;• &quot;Photosynthesis light and dark reactions with labeled diagram.&quot;"
               rows={4}
               className="w-full text-sm sm:text-base text-slate-800 placeholder-slate-400 bg-transparent border-0 focus:ring-0 resize-y min-h-[110px] leading-relaxed"
             />
@@ -307,8 +313,8 @@ export const HeroPromptInput: React.FC<HeroPromptInputProps> = ({
                 </>
               ) : (
                 <>
-                  <Wand2 className="w-4 h-4" />
-                  <span>Generate Visual Notes</span>
+                  <Sparkles className="w-4 h-4" />
+                  <span>Generate Notes</span>
                   <ArrowRight className="w-4 h-4 ml-1" />
                 </>
               )}
