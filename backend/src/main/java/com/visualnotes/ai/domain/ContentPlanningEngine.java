@@ -7,184 +7,233 @@ import java.util.*;
 @Component
 public class ContentPlanningEngine {
 
-    public static class TopicPlan {
+    public static class PlannedSection {
+        private String heading;
+        private String badge;
+        private String pedagogicalPurpose;
+        private String priority; // HIGH, MEDIUM
+        private List<String> targetConcepts;
+
+        public PlannedSection() {}
+
+        public PlannedSection(String heading, String badge, String pedagogicalPurpose, String priority, List<String> targetConcepts) {
+            this.heading = heading;
+            this.badge = badge;
+            this.pedagogicalPurpose = pedagogicalPurpose;
+            this.priority = priority;
+            this.targetConcepts = targetConcepts;
+        }
+
+        public String getHeading() { return heading; }
+        public void setHeading(String heading) { this.heading = heading; }
+        public String getBadge() { return badge; }
+        public void setBadge(String badge) { this.badge = badge; }
+        public String getPedagogicalPurpose() { return pedagogicalPurpose; }
+        public void setPedagogicalPurpose(String pedagogicalPurpose) { this.pedagogicalPurpose = pedagogicalPurpose; }
+        public String getPriority() { return priority; }
+        public void setPriority(String priority) { this.priority = priority; }
+        public List<String> getTargetConcepts() { return targetConcepts; }
+        public void setTargetConcepts(List<String> targetConcepts) { this.targetConcepts = targetConcepts; }
+    }
+
+    public static class TeachingPlan {
         private String topic;
         private DomainType domain;
-        private String intent; // "DEFINITION", "COMPARISON", "ALGORITHM", "MECHANISM", "FORMULATION", "SYSTEM_DESIGN"
-        private Set<String> requiredBlocks;
-        private Set<String> excludedBlocks;
+        private TopicUnderstandingEngine.UserIntent intent;
+        private List<PlannedSection> sections = new ArrayList<>();
+        private boolean includeDiagram;
         private String diagramType;
-        private boolean needsComparisonTable;
-        private boolean needsAlgorithm;
-        private boolean needsPseudocode;
-        private boolean needsFormula;
-        private boolean needsExample;
-        private boolean needsComplexity;
-        private boolean needsExamTips;
+        private String diagramTitle;
+        private String diagramCaption;
+        private boolean includeFormula;
+        private String formulaTitle;
+        private boolean includeComparisonTable;
+        private String comparisonTableTitle;
+        private boolean includeAlgorithm;
+        private boolean includePseudocode;
+        private boolean includeWorkedExample;
+        private String exampleTitle;
+        private boolean includeComplexity;
+        private boolean includeExamTips;
+        private Set<String> excludedBlocks = new HashSet<>();
 
         public String getTopic() { return topic; }
         public void setTopic(String topic) { this.topic = topic; }
         public DomainType getDomain() { return domain; }
         public void setDomain(DomainType domain) { this.domain = domain; }
-        public String getIntent() { return intent; }
-        public void setIntent(String intent) { this.intent = intent; }
-        public Set<String> getRequiredBlocks() { return requiredBlocks; }
-        public void setRequiredBlocks(Set<String> requiredBlocks) { this.requiredBlocks = requiredBlocks; }
-        public Set<String> getExcludedBlocks() { return excludedBlocks; }
-        public void setExcludedBlocks(Set<String> excludedBlocks) { this.excludedBlocks = excludedBlocks; }
+        public TopicUnderstandingEngine.UserIntent getIntent() { return intent; }
+        public void setIntent(TopicUnderstandingEngine.UserIntent intent) { this.intent = intent; }
+        public List<PlannedSection> getSections() { return sections; }
+        public void setSections(List<PlannedSection> sections) { this.sections = sections; }
+        public boolean isIncludeDiagram() { return includeDiagram; }
+        public void setIncludeDiagram(boolean includeDiagram) { this.includeDiagram = includeDiagram; }
         public String getDiagramType() { return diagramType; }
         public void setDiagramType(String diagramType) { this.diagramType = diagramType; }
-        public boolean isNeedsComparisonTable() { return needsComparisonTable; }
-        public void setNeedsComparisonTable(boolean needsComparisonTable) { this.needsComparisonTable = needsComparisonTable; }
-        public boolean isNeedsAlgorithm() { return needsAlgorithm; }
-        public void setNeedsAlgorithm(boolean needsAlgorithm) { this.needsAlgorithm = needsAlgorithm; }
-        public boolean isNeedsPseudocode() { return needsPseudocode; }
-        public void setNeedsPseudocode(boolean needsPseudocode) { this.needsPseudocode = needsPseudocode; }
-        public boolean isNeedsFormula() { return needsFormula; }
-        public void setNeedsFormula(boolean needsFormula) { this.needsFormula = needsFormula; }
-        public boolean isNeedsExample() { return needsExample; }
-        public void setNeedsExample(boolean needsExample) { this.needsExample = needsExample; }
-        public boolean isNeedsComplexity() { return needsComplexity; }
-        public void setNeedsComplexity(boolean needsComplexity) { this.needsComplexity = needsComplexity; }
-        public boolean isNeedsExamTips() { return needsExamTips; }
-        public void setNeedsExamTips(boolean needsExamTips) { this.needsExamTips = needsExamTips; }
+        public String getDiagramTitle() { return diagramTitle; }
+        public void setDiagramTitle(String diagramTitle) { this.diagramTitle = diagramTitle; }
+        public String getDiagramCaption() { return diagramCaption; }
+        public void setDiagramCaption(String diagramCaption) { this.diagramCaption = diagramCaption; }
+        public boolean isIncludeFormula() { return includeFormula; }
+        public void setIncludeFormula(boolean includeFormula) { this.includeFormula = includeFormula; }
+        public String getFormulaTitle() { return formulaTitle; }
+        public void setFormulaTitle(String formulaTitle) { this.formulaTitle = formulaTitle; }
+        public boolean isIncludeComparisonTable() { return includeComparisonTable; }
+        public void setIncludeComparisonTable(boolean includeComparisonTable) { this.includeComparisonTable = includeComparisonTable; }
+        public String getComparisonTableTitle() { return comparisonTableTitle; }
+        public void setComparisonTableTitle(String comparisonTableTitle) { this.comparisonTableTitle = comparisonTableTitle; }
+        public boolean isIncludeAlgorithm() { return includeAlgorithm; }
+        public void setIncludeAlgorithm(boolean includeAlgorithm) { this.includeAlgorithm = includeAlgorithm; }
+        public boolean isIncludePseudocode() { return includePseudocode; }
+        public void setIncludePseudocode(boolean includePseudocode) { this.includePseudocode = includePseudocode; }
+        public boolean isIncludeWorkedExample() { return includeWorkedExample; }
+        public void setIncludeWorkedExample(boolean includeWorkedExample) { this.includeWorkedExample = includeWorkedExample; }
+        public String getExampleTitle() { return exampleTitle; }
+        public void setExampleTitle(String exampleTitle) { this.exampleTitle = exampleTitle; }
+        public boolean isIncludeComplexity() { return includeComplexity; }
+        public void setIncludeComplexity(boolean includeComplexity) { this.includeComplexity = includeComplexity; }
+        public boolean isIncludeExamTips() { return includeExamTips; }
+        public void setIncludeExamTips(boolean includeExamTips) { this.includeExamTips = includeExamTips; }
+        public Set<String> getExcludedBlocks() { return excludedBlocks; }
+        public void setExcludedBlocks(Set<String> excludedBlocks) { this.excludedBlocks = excludedBlocks; }
     }
 
-    public TopicPlan plan(String rawPrompt, DomainType domain) {
-        TopicPlan plan = new TopicPlan();
-        plan.setTopic(rawPrompt);
-        plan.setDomain(domain);
+    public TeachingPlan createTeachingPlan(TopicUnderstandingEngine.TopicUnderstandingResult understanding) {
+        TeachingPlan plan = new TeachingPlan();
+        plan.setTopic(understanding.getNormalizedTopic());
+        plan.setDomain(understanding.getDomain());
+        plan.setIntent(understanding.getIntent());
 
-        String lower = rawPrompt.toLowerCase().trim();
-        Set<String> required = new HashSet<>();
-        Set<String> excluded = new HashSet<>();
+        // 1. Diagrams
+        plan.setIncludeDiagram(understanding.isRequiresDiagram());
+        plan.setDiagramType(understanding.getSuggestedDiagramType());
+        plan.setDiagramTitle(understanding.getNormalizedTopic() + " Concept Diagram");
+        plan.setDiagramCaption("Visual representation of " + understanding.getNormalizedTopic());
 
-        // 1. Detect Intent & Structure
-        if ((lower.contains("nfa") && lower.contains("dfa")) || lower.contains("finite automata") || lower.contains("automata")) {
-            plan.setIntent("COMPARISON_AND_FORMAL_DEFINITION");
-            plan.setDiagramType("automata-state-transition");
-            plan.setNeedsComparisonTable(true);
-            plan.setNeedsFormula(true); // 5-tuple formal definition: M = (Q, Sigma, delta, q0, F)
-            plan.setNeedsExample(true);
-            plan.setNeedsExamTips(true);
-            
-            // Explicitly exclude unnecessary sections
-            plan.setNeedsComplexity(false);
-            plan.setNeedsAlgorithm(false);
-            plan.setNeedsPseudocode(false);
-            excluded.addAll(List.of("complexity", "algorithm", "pseudocode", "advantages", "limitations", "code"));
-            required.addAll(List.of("definition", "formal_notation", "comparison_table", "state_diagram", "exam_takeaways"));
+        // 2. Mathematical Formulas
+        plan.setIncludeFormula(understanding.isRequiresFormula());
+        plan.setFormulaTitle("Core Mathematical Formulation");
 
-        } else if (lower.contains("binary search") || lower.contains("linear search")) {
-            plan.setIntent("ALGORITHM");
-            plan.setDiagramType("binary-search-array");
-            plan.setNeedsAlgorithm(true);
-            plan.setNeedsPseudocode(true);
-            plan.setNeedsComplexity(true);
-            plan.setNeedsExample(true);
-            plan.setNeedsExamTips(true);
-            excluded.addAll(List.of("advantages", "limitations"));
-            required.addAll(List.of("definition", "condition", "algorithm", "trace_example", "complexity", "diagram"));
+        // 3. Comparison Table
+        plan.setIncludeComparisonTable(understanding.isRequiresComparisonTable());
+        plan.setComparisonTableTitle("Comparative Analysis: " + understanding.getNormalizedTopic());
 
-        } else if (lower.contains("newton") || lower.contains("laws of motion")) {
-            plan.setIntent("PHYSICAL_LAW");
-            plan.setDiagramType("physics-diagram");
-            plan.setNeedsFormula(true);
-            plan.setNeedsExample(true);
-            plan.setNeedsExamTips(true);
-            plan.setNeedsComplexity(false);
-            plan.setNeedsAlgorithm(false);
-            plan.setNeedsPseudocode(false);
-            excluded.addAll(List.of("complexity", "algorithm", "pseudocode"));
-            required.addAll(List.of("three_laws", "vector_formulas", "fbd_diagram", "real_world_examples", "exam_tips"));
+        // 4. Algorithm & Complexity
+        plan.setIncludeAlgorithm(understanding.isRequiresAlgorithm());
+        plan.setIncludePseudocode(understanding.isRequiresPseudocode());
+        plan.setIncludeComplexity(understanding.isRequiresAlgorithm() && (understanding.getDomain() == DomainType.ALGORITHMS || understanding.getDomain() == DomainType.DATA_STRUCTURES));
 
-        } else if (lower.contains("sql") && (lower.contains("join") || lower.contains("joins") || lower.contains("inner") || lower.contains("left"))) {
-            plan.setIntent("DATABASE_OPERATIONS");
-            plan.setDiagramType("sql-join-venn");
-            plan.setNeedsComparisonTable(true);
-            plan.setNeedsExample(true);
-            plan.setNeedsExamTips(true);
-            plan.setNeedsComplexity(false);
-            excluded.addAll(List.of("complexity", "pseudocode", "advantages"));
-            required.addAll(List.of("definition", "join_types", "venn_diagram", "sql_syntax_example", "comparison_table"));
+        // 5. Worked Example & Exam Tips
+        plan.setIncludeWorkedExample(understanding.isRequiresWorkedExample());
+        plan.setExampleTitle("Worked Example & Step-by-Step Application");
+        plan.setIncludeExamTips(true);
 
-        } else if (lower.contains("photosynthesis")) {
-            plan.setIntent("BIOLOGICAL_CYCLE");
-            plan.setDiagramType("science-reaction");
-            plan.setNeedsFormula(true); // Biochemical chemical equation
-            plan.setNeedsExamTips(true);
-            plan.setNeedsComplexity(false);
-            plan.setNeedsAlgorithm(false);
-            plan.setNeedsPseudocode(false);
-            excluded.addAll(List.of("complexity", "algorithm", "pseudocode", "advantages"));
-            required.addAll(List.of("definition", "chemical_equation", "light_reaction", "calvin_cycle", "chloroplast_diagram"));
+        // 6. Excluded blocks
+        plan.setExcludedBlocks(understanding.getExplicitlyExcludedBlocks());
 
-        } else if (lower.contains("ohm") || lower.contains("kirchhoff") || lower.contains("resistor")) {
-            plan.setIntent("CIRCUIT_LAW");
-            plan.setDiagramType("circuit-schematic");
-            plan.setNeedsFormula(true); // V = IR, P = VI
-            plan.setNeedsExample(true);
-            plan.setNeedsExamTips(true);
-            plan.setNeedsComplexity(false);
-            plan.setNeedsAlgorithm(false);
-            plan.setNeedsPseudocode(false);
-            excluded.addAll(List.of("complexity", "algorithm", "pseudocode"));
-            required.addAll(List.of("statement", "formula", "circuit_diagram", "i_v_curve", "series_parallel_rules"));
+        // 7. Dynamic Pedagogical Sections Construction (No Generic Templates!)
+        buildPedagogicalSections(plan, understanding);
 
-        } else if (lower.contains("scheduling") || lower.contains("fcfs") || lower.contains("round robin") || lower.contains("sjf")) {
-            plan.setIntent("OS_ALGORITHM");
-            plan.setDiagramType("os-gantt-chart");
-            plan.setNeedsFormula(true); // TAT = CT - AT, WT = TAT - BT
-            plan.setNeedsExample(true);
-            plan.setNeedsComparisonTable(true);
-            plan.setNeedsExamTips(true);
-            excluded.addAll(List.of("advantages", "limitations"));
-            required.addAll(List.of("definition", "scheduling_criteria", "gantt_chart", "numerical_example", "formulas"));
+        return plan;
+    }
 
-        } else if (lower.contains("normalization") || lower.contains("1nf") || lower.contains("2nf") || lower.contains("3nf") || lower.contains("bcnf")) {
-            plan.setIntent("DATABASE_NORMALIZATION");
-            plan.setDiagramType("dbms-normalization");
-            plan.setNeedsComparisonTable(true);
-            plan.setNeedsExample(true);
-            plan.setNeedsExamTips(true);
-            plan.setNeedsComplexity(false);
-            plan.setNeedsAlgorithm(false);
-            excluded.addAll(List.of("complexity", "algorithm", "pseudocode"));
-            required.addAll(List.of("definition", "anomalies", "normal_forms_rules", "decomposition_example", "diagram"));
+    private void buildPedagogicalSections(TeachingPlan plan, TopicUnderstandingEngine.TopicUnderstandingResult u) {
+        List<PlannedSection> sections = new ArrayList<>();
+        List<String> subtopics = u.getPrimarySubtopics();
 
-        } else if (lower.contains("vs") || lower.contains("versus") || lower.contains("difference between") || lower.contains("compare")) {
-            plan.setIntent("COMPARISON");
-            plan.setDiagramType("concept-map");
-            plan.setNeedsComparisonTable(true);
-            plan.setNeedsExamTips(true);
-            plan.setNeedsComplexity(false);
-            excluded.addAll(List.of("complexity", "advantages", "limitations"));
-            required.addAll(List.of("definitions", "comparison_table", "key_differences", "exam_takeaways"));
-
-        } else if (domain == DomainType.ALGORITHMS || domain == DomainType.DATA_STRUCTURES) {
-            plan.setIntent("ALGORITHM");
-            plan.setDiagramType("sorting-partition");
-            plan.setNeedsAlgorithm(true);
-            plan.setNeedsComplexity(true);
-            plan.setNeedsExample(true);
-            plan.setNeedsExamTips(true);
-            excluded.addAll(List.of("advantages", "limitations"));
-            required.addAll(List.of("definition", "algorithm", "example", "complexity", "diagram"));
-
+        if (u.getIntent() == TopicUnderstandingEngine.UserIntent.COMPARE || subtopics.size() > 1) {
+            // Comparative or multi-topic intent
+            for (int i = 0; i < subtopics.size(); i++) {
+                String sub = subtopics.get(i);
+                sections.add(new PlannedSection(
+                        (i + 1) + ". " + sub + " (Definition & Formal Properties)",
+                        "Core Concept",
+                        "Define " + sub + " with precise theoretical rules and characteristics.",
+                        "HIGH",
+                        List.of(sub + " definition", sub + " transition/mechanics", sub + " properties")
+                ));
+            }
+        } else if (u.getIntent() == TopicUnderstandingEngine.UserIntent.DEFINE) {
+            // Pure definition intent
+            sections.add(new PlannedSection(
+                    "1. Formal Definition & Theoretical Foundation",
+                    "Formal Definition",
+                    "Define " + u.getNormalizedTopic() + " rigorously.",
+                    "HIGH",
+                    List.of("Formal definition", "Notation", "Preconditions")
+            ));
+            sections.add(new PlannedSection(
+                    "2. Core Properties & Invariants",
+                    "Fundamental Properties",
+                    "Key properties, rules, and mathematical behaviors.",
+                    "HIGH",
+                    List.of("Properties", "Operational behavior", "Invariants")
+            ));
+        } else if (u.getDomain() == DomainType.PHYSICS || u.getCategory() == TopicUnderstandingEngine.TopicCategory.PHYSICAL_LAW) {
+            // Physics / physical law
+            sections.add(new PlannedSection(
+                    "1. Physical Statement & Governing Principle",
+                    "Physical Law",
+                    "State the fundamental physical laws governing " + u.getNormalizedTopic() + ".",
+                    "HIGH",
+                    List.of("Physical law statement", "Sign conventions", "Vector equations")
+            ));
+            sections.add(new PlannedSection(
+                    "2. Dynamics & Mathematical Formulations",
+                    "Derivations",
+                    "Relate forces, energy, or field variables mathematically.",
+                    "HIGH",
+                    List.of("Governing equations", "Physical meaning of variables", "Units & dimensions")
+            ));
+        } else if (u.getDomain() == DomainType.ALGORITHMS || u.getCategory() == TopicUnderstandingEngine.TopicCategory.ALGORITHM_PROCEDURE) {
+            // Algorithm / procedure
+            sections.add(new PlannedSection(
+                    "1. Purpose & Preconditions",
+                    "Prerequisites",
+                    "Explain the problem statement, preconditions, and invariant.",
+                    "HIGH",
+                    List.of("Problem statement", "Input precondition", "Base assumptions")
+            ));
+            sections.add(new PlannedSection(
+                    "2. Algorithmic Strategy (Divide & Conquer / Greedy / Iterative)",
+                    "Core Logic",
+                    "Explain the algorithmic mechanics and decision rules.",
+                    "HIGH",
+                    List.of("Core intuition", "Decision rule", "Branching logic")
+            ));
+        } else if (u.getDomain() == DomainType.DBMS) {
+            // Database systems
+            sections.add(new PlannedSection(
+                    "1. Foundations & Anomaly Prevention",
+                    "Relational Rules",
+                    "Explain why " + u.getNormalizedTopic() + " is required and what anomalies it prevents.",
+                    "HIGH",
+                    List.of("Functional dependencies", "Redundancy anomalies", "Relational rules")
+            ));
+            sections.add(new PlannedSection(
+                    "2. Step-by-Step Rules & Normal Forms",
+                    "Decomposition",
+                    "Detailed decomposition rules and candidate key criteria.",
+                    "HIGH",
+                    List.of("Normalization progression", "Lossless decomposition", "Dependency preservation")
+            ));
         } else {
-            plan.setIntent("CONCEPT_EXPLANATION");
-            plan.setDiagramType("concept-map");
-            plan.setNeedsExample(true);
-            plan.setNeedsExamTips(true);
-            plan.setNeedsComplexity(false);
-            plan.setNeedsAlgorithm(false);
-            plan.setNeedsPseudocode(false);
-            excluded.addAll(List.of("complexity", "algorithm", "pseudocode"));
-            required.addAll(List.of("definition", "core_concepts", "worked_example", "diagram", "key_points"));
+            // General topic: Concept + Working Mechanism
+            sections.add(new PlannedSection(
+                    "1. Core Principle & Intuition",
+                    "Foundations",
+                    "Explain what " + u.getNormalizedTopic() + " is and why it exists.",
+                    "HIGH",
+                    List.of("Definition", "Purpose", "Core intuition")
+            ));
+            sections.add(new PlannedSection(
+                    "2. Mechanism & Structural Flow",
+                    "Internal Mechanics",
+                    "How " + u.getNormalizedTopic() + " operates internally.",
+                    "HIGH",
+                    List.of("Mechanism", "Step-by-step process", "Key interactions")
+            ));
         }
 
-        plan.setRequiredBlocks(required);
-        plan.setExcludedBlocks(excluded);
-        return plan;
+        plan.setSections(sections);
     }
 }

@@ -1,8 +1,7 @@
 package com.visualnotes.service;
 
 import com.visualnotes.ai.SemanticEngineAiProvider;
-import com.visualnotes.ai.domain.ContentQualityValidator;
-import com.visualnotes.ai.domain.PromptUnderstandingEngine;
+import com.visualnotes.ai.domain.*;
 import com.visualnotes.ai.strategy.*;
 import com.visualnotes.diagram.DiagramEngine;
 import com.visualnotes.dto.PageContentDto;
@@ -18,34 +17,18 @@ public class BenchmarkTopicGenerationTest {
     @BeforeEach
     void setUp() {
         DiagramEngine diagramEngine = new DiagramEngine();
-        PromptUnderstandingEngine promptEngine = new PromptUnderstandingEngine();
+        TopicUnderstandingEngine topicEngine = new TopicUnderstandingEngine();
+        ContentPlanningEngine planningEngine = new ContentPlanningEngine();
+        ContentSynthesisEngine synthesisEngine = new ContentSynthesisEngine(diagramEngine);
         ContentQualityValidator validator = new ContentQualityValidator();
-
-        PhysicsContentStrategy physicsStrategy = new PhysicsContentStrategy(diagramEngine);
-        BiologyContentStrategy biologyStrategy = new BiologyContentStrategy(diagramEngine);
-        MathematicsContentStrategy mathStrategy = new MathematicsContentStrategy(diagramEngine);
-        DbmsContentStrategy dbmsStrategy = new DbmsContentStrategy(diagramEngine);
-        NetworkingContentStrategy networkingStrategy = new NetworkingContentStrategy(diagramEngine);
-        AiMlContentStrategy aiMlStrategy = new AiMlContentStrategy(diagramEngine);
-        AlgorithmsContentStrategy algorithmsStrategy = new AlgorithmsContentStrategy(diagramEngine);
-        AutomataContentStrategy automataStrategy = new AutomataContentStrategy(diagramEngine);
-        OperatingSystemsContentStrategy operatingSystemsStrategy = new OperatingSystemsContentStrategy(diagramEngine);
-        GeneralTheoryContentStrategy generalStrategy = new GeneralTheoryContentStrategy(diagramEngine);
+        PagePlanningEngine pageEngine = new PagePlanningEngine();
 
         semanticEngine = new SemanticEngineAiProvider(
-                diagramEngine,
-                promptEngine,
+                topicEngine,
+                planningEngine,
+                synthesisEngine,
                 validator,
-                physicsStrategy,
-                biologyStrategy,
-                mathStrategy,
-                dbmsStrategy,
-                networkingStrategy,
-                aiMlStrategy,
-                algorithmsStrategy,
-                automataStrategy,
-                operatingSystemsStrategy,
-                generalStrategy
+                pageEngine
         );
     }
 
