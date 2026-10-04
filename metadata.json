@@ -1,0 +1,7 @@
+{
+  "name": "AI Visual Notes",
+  "description": "Generate visual, handwritten-style study notes with step-by-step diagrams, key concepts, formulas, and exam tips.",
+  "capabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
