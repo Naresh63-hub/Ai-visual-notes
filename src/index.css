@@ -1,0 +1,38 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+}
+
+/* Handwritten ruled lines simulation */
+.paper-ruled {
+  background-image: repeating-linear-gradient(
+    transparent,
+    transparent 29px,
+    #e2e8f0 29px,
+    #e2e8f0 30px
+  );
+  line-height: 30px;
+}
+
+.paper-grid {
+  background-size: 24px 24px;
+  background-image: 
+    linear-gradient(to right, #f1f5f9 1px, transparent 1px),
+    linear-gradient(to bottom, #f1f5f9 1px, transparent 1px);
+}
+
+/* Subtle hand-drawn border effect */
+.hand-box {
+  border-radius: 4px 12px 6px 14px;
+  transform: rotate(-0.3deg);
+}
+
+.hand-box-alt {
+  border-radius: 12px 5px 14px 4px;
+  transform: rotate(0.4deg);
+}
