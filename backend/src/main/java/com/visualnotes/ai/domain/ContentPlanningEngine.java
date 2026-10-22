@@ -111,7 +111,7 @@ public class ContentPlanningEngine {
 
         // 2. Mathematical Formulas
         plan.setIncludeFormula(understanding.isRequiresFormula());
-        plan.setFormulaTitle("Core Mathematical Formulation");
+        plan.setFormulaTitle("Core Mathematical / Scientific Formulation");
 
         // 3. Comparison Table
         plan.setIncludeComparisonTable(understanding.isRequiresComparisonTable());
@@ -124,13 +124,13 @@ public class ContentPlanningEngine {
 
         // 5. Worked Example & Exam Tips
         plan.setIncludeWorkedExample(understanding.isRequiresWorkedExample());
-        plan.setExampleTitle("Worked Example & Step-by-Step Application");
+        plan.setExampleTitle("Worked Application & Step-by-Step Example");
         plan.setIncludeExamTips(true);
 
         // 6. Excluded blocks
         plan.setExcludedBlocks(understanding.getExplicitlyExcludedBlocks());
 
-        // 7. Dynamic Pedagogical Sections Construction (No Generic Templates!)
+        // 7. Dynamic Pedagogical Sections Construction
         buildPedagogicalSections(plan, understanding);
 
         return plan;
@@ -138,99 +138,182 @@ public class ContentPlanningEngine {
 
     private void buildPedagogicalSections(TeachingPlan plan, TopicUnderstandingEngine.TopicUnderstandingResult u) {
         List<PlannedSection> sections = new ArrayList<>();
-        List<String> subtopics = u.getPrimarySubtopics();
+        String topic = u.getNormalizedTopic();
+        String lower = (topic + " " + u.getRawPrompt()).toLowerCase();
+        List<String> scope = u.getRequestedScope();
 
-        if (u.getIntent() == TopicUnderstandingEngine.UserIntent.COMPARE || subtopics.size() > 1) {
-            // Comparative or multi-topic intent
-            for (int i = 0; i < subtopics.size(); i++) {
-                String sub = subtopics.get(i);
-                sections.add(new PlannedSection(
-                        (i + 1) + ". " + sub + " (Definition & Formal Properties)",
-                        "Core Concept",
-                        "Define " + sub + " with precise theoretical rules and characteristics.",
-                        "HIGH",
-                        List.of(sub + " definition", sub + " transition/mechanics", sub + " properties")
-                ));
-            }
-        } else if (u.getIntent() == TopicUnderstandingEngine.UserIntent.DEFINE) {
-            // Pure definition intent
+        // Case 1: Multi-entity comparison (e.g. TCP vs UDP, Stack vs Queue, NFA vs DFA)
+        if (u.isMultiEntityComparison() && u.getTargetEntities().size() >= 2) {
+            String e1 = u.getTargetEntities().get(0);
+            String e2 = u.getTargetEntities().get(1);
+
             sections.add(new PlannedSection(
-                    "1. Formal Definition & Theoretical Foundation",
-                    "Formal Definition",
-                    "Define " + u.getNormalizedTopic() + " rigorously.",
+                    "1. Conceptual Foundations & Operational Principles",
+                    "Architectural Models",
+                    "Compare the underlying design philosophy and operational mechanisms of " + e1 + " and " + e2 + ".",
                     "HIGH",
-                    List.of("Formal definition", "Notation", "Preconditions")
+                    List.of(e1 + " operational model", e2 + " operational model", "Key design differences")
+            ));
+            sections.add(new PlannedSection(
+                    "2. Performance Trade-offs & Selection Criteria",
+                    "Protocol Comparison",
+                    "Evaluate throughput, overhead, reliability, and real-world system applications.",
+                    "HIGH",
+                    List.of("Performance & overhead", "Reliability guarantees", "Typical industry use cases")
+            ));
+        }
+        // Case 2: Explicit Scope / Classification (e.g. Network Topology & Types, OSI & Layers, Normalization & Forms, Deadlock & Conditions, Mitosis Phases)
+        else if (scope != null && !scope.isEmpty() && scope.size() >= 2) {
+            sections.add(new PlannedSection(
+                    "1. Architectural Overview & Structural Taxonomy",
+                    "Classification",
+                    "Establish the fundamental classification criteria and structural organization of " + topic + ".",
+                    "HIGH",
+                    List.of("Core taxonomy", "Classification criteria", "Structural layout")
+            ));
+
+            sections.add(new PlannedSection(
+                    "2. Deep-Dive: Specific Types & Operational Mechanics",
+                    "Detailed Analysis",
+                    "Examine each individual variant with its advantages, failure modes, and practical applications.",
+                    "HIGH",
+                    scope
+            ));
+        }
+        // Case 3: Pure Definition
+        else if (u.getIntent() == TopicUnderstandingEngine.UserIntent.DEFINE) {
+            sections.add(new PlannedSection(
+                    "1. Formal Mathematical & Theoretical Definition",
+                    "Formal Definition",
+                    "Define " + topic + " rigorously with standard academic notation and state models.",
+                    "HIGH",
+                    List.of("Formal definition", "Notation & tuples", "Preconditions")
             ));
             sections.add(new PlannedSection(
                     "2. Core Properties & Invariants",
                     "Fundamental Properties",
-                    "Key properties, rules, and mathematical behaviors.",
+                    "Key properties, invariants, and operational behavior.",
                     "HIGH",
-                    List.of("Properties", "Operational behavior", "Invariants")
+                    List.of("Properties & rules", "Equivalence criteria", "Systemic boundaries")
             ));
-        } else if (u.getDomain() == DomainType.PHYSICS || u.getCategory() == TopicUnderstandingEngine.TopicCategory.PHYSICAL_LAW) {
-            // Physics / physical law
+        }
+        // Case 4: Physics / Mechanics
+        else if (u.getDomain() == DomainType.PHYSICS || u.getCategory() == TopicUnderstandingEngine.TopicCategory.PHYSICAL_LAW) {
             sections.add(new PlannedSection(
-                    "1. Physical Statement & Governing Principle",
+                    "1. Physical Statement & Governing Laws",
                     "Physical Law",
-                    "State the fundamental physical laws governing " + u.getNormalizedTopic() + ".",
+                    "State the fundamental physical laws governing " + topic + ".",
                     "HIGH",
                     List.of("Physical law statement", "Sign conventions", "Vector equations")
             ));
             sections.add(new PlannedSection(
-                    "2. Dynamics & Mathematical Formulations",
-                    "Derivations",
-                    "Relate forces, energy, or field variables mathematically.",
+                    "2. Dynamics & Mathematical Formulation",
+                    "Derivation",
+                    "Relate physical variables, forces, or energy mathematically.",
                     "HIGH",
-                    List.of("Governing equations", "Physical meaning of variables", "Units & dimensions")
+                    List.of("Governing equations", "Physical meaning of variables", "SI units & dimensions")
             ));
-        } else if (u.getDomain() == DomainType.ALGORITHMS || u.getCategory() == TopicUnderstandingEngine.TopicCategory.ALGORITHM_PROCEDURE) {
-            // Algorithm / procedure
+        }
+        // Case 5: Electronics / Circuits
+        else if (u.getDomain() == DomainType.ELECTRONICS) {
             sections.add(new PlannedSection(
-                    "1. Purpose & Preconditions",
+                    "1. Device Physics & Operating Regions",
+                    "Circuit Analysis",
+                    "Analyze the operational states and electrical characteristics of " + topic + ".",
+                    "HIGH",
+                    List.of("Operating states", "Biasing conditions", "V-I characteristics")
+            ));
+            sections.add(new PlannedSection(
+                    "2. Circuit Configuration & Switching Dynamics",
+                    "Switching Action",
+                    "Explain circuit schematic behavior, cut-off / saturation transitions, and equations.",
+                    "HIGH",
+                    List.of("Switching action", "Input/output voltages", "Design equations")
+            ));
+        }
+        // Case 6: Biology / Life Sciences
+        else if (u.getDomain() == DomainType.BIOLOGY) {
+            sections.add(new PlannedSection(
+                    "1. Cellular Mechanism & Biological Pathways",
+                    "Pathways",
+                    "Detail the cellular organelles, enzymes, and molecular stages involved in " + topic + ".",
+                    "HIGH",
+                    List.of("Organelle sites", "Molecular inputs/outputs", "Enzymatic regulation")
+            ));
+            sections.add(new PlannedSection(
+                    "2. Sequential Stages & Energy Transformation",
+                    "Bioenergetics",
+                    "Trace the biochemical transformation and physiological significance.",
+                    "HIGH",
+                    List.of("Step-by-step phases", "Chemical transformations", "Physiological role")
+            ));
+        }
+        // Case 7: Algorithms & Data Structures
+        else if (u.getDomain() == DomainType.ALGORITHMS || u.getDomain() == DomainType.DATA_STRUCTURES || u.getCategory() == TopicUnderstandingEngine.TopicCategory.ALGORITHM_PROCEDURE) {
+            sections.add(new PlannedSection(
+                    "1. Purpose, Preconditions & Invariants",
                     "Prerequisites",
                     "Explain the problem statement, preconditions, and invariant.",
                     "HIGH",
                     List.of("Problem statement", "Input precondition", "Base assumptions")
             ));
             sections.add(new PlannedSection(
-                    "2. Algorithmic Strategy (Divide & Conquer / Greedy / Iterative)",
+                    "2. Algorithmic Strategy & Procedural Execution",
                     "Core Logic",
                     "Explain the algorithmic mechanics and decision rules.",
                     "HIGH",
                     List.of("Core intuition", "Decision rule", "Branching logic")
             ));
-        } else if (u.getDomain() == DomainType.DBMS) {
-            // Database systems
+        }
+        // Case 8: Object-Oriented Programming & Software Engineering
+        else if (u.getDomain() == DomainType.SOFTWARE_ENGINEERING || u.getDomain() == DomainType.PROGRAMMING) {
             sections.add(new PlannedSection(
-                    "1. Foundations & Anomaly Prevention",
-                    "Relational Rules",
-                    "Explain why " + u.getNormalizedTopic() + " is required and what anomalies it prevents.",
+                    "1. Core Paradigm & Theoretical Concept",
+                    "OOP Principles",
+                    "Explain the architectural purpose and programming paradigm for " + topic + ".",
                     "HIGH",
-                    List.of("Functional dependencies", "Redundancy anomalies", "Relational rules")
+                    List.of("Conceptual definition", "Design rationale", "Key mechanisms")
             ));
             sections.add(new PlannedSection(
-                    "2. Step-by-Step Rules & Normal Forms",
-                    "Decomposition",
-                    "Detailed decomposition rules and candidate key criteria.",
+                    "2. Implementation Mechanics & Code Patterns",
+                    "Code Structure",
+                    "Show compile-time vs runtime behavior, method signatures, and practical design patterns.",
                     "HIGH",
-                    List.of("Normalization progression", "Lossless decomposition", "Dependency preservation")
+                    List.of("Method binding", "Class hierarchy", "Best practices")
             ));
-        } else {
-            // General topic: Concept + Working Mechanism
+        }
+        // Case 9: Mathematics
+        else if (u.getDomain() == DomainType.MATHEMATICS || u.getIntent() == TopicUnderstandingEngine.UserIntent.DERIVE_FORMULATION) {
             sections.add(new PlannedSection(
-                    "1. Core Principle & Intuition",
-                    "Foundations",
-                    "Explain what " + u.getNormalizedTopic() + " is and why it exists.",
+                    "1. Statement of Problem & Algebraic Foundation",
+                    "Mathematical Formulation",
+                    "Establish the initial equations, definitions, and boundary conditions.",
                     "HIGH",
-                    List.of("Definition", "Purpose", "Core intuition")
+                    List.of("Standard form equation", "Initial assumptions", "Mathematical identity")
             ));
             sections.add(new PlannedSection(
-                    "2. Mechanism & Structural Flow",
-                    "Internal Mechanics",
-                    "How " + u.getNormalizedTopic() + " operates internally.",
+                    "2. Step-by-Step Algebraic Derivation",
+                    "Analytical Proof",
+                    "Derive the governing formula step-by-step with clear algebraic justification.",
                     "HIGH",
-                    List.of("Mechanism", "Step-by-step process", "Key interactions")
+                    List.of("Completing the square / transformation", "Isolating variables", "Final analytical roots")
+            ));
+        }
+        // Default Domain-Specific Concept Breakdown
+        else {
+            sections.add(new PlannedSection(
+                    "1. Fundamental Concepts & Principles",
+                    u.getDomain().getDisplayName(),
+                    "Explain what " + topic + " is, why it exists, and its core foundational principles.",
+                    "HIGH",
+                    List.of(topic + " definition", "Core operational rules", "Domain relevance")
+            ));
+            sections.add(new PlannedSection(
+                    "2. Architecture, Operation & Key Dynamics",
+                    "System Dynamics",
+                    "Explain the internal mechanics, structural flow, and interactions of " + topic + ".",
+                    "HIGH",
+                    List.of("Internal mechanics", "Operational flow", "Key interactions")
             ));
         }
 

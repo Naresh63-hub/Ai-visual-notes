@@ -22,6 +22,8 @@ public class FormulaDto {
     public void setTitle(String title) { this.title = title; }
     public String getExpression() { return expression; }
     public void setExpression(String expression) { this.expression = expression; }
+    public String getLatex() { return expression; }
+    public void setLatex(String latex) { this.expression = latex; }
     public String getExplanation() { return explanation; }
     public void setExplanation(String explanation) { this.explanation = explanation; }
     public List<FormulaVariableDto> getVariables() { return variables; }

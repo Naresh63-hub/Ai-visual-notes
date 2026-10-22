@@ -3,6 +3,7 @@ package com.visualnotes.ai;
 import com.visualnotes.dto.PageContentDto;
 import com.visualnotes.dto.PagePlanDto;
 import com.visualnotes.dto.PromptAnalysisResponse;
+import com.visualnotes.dto.SemanticDocumentDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,21 +15,80 @@ public class AiService {
     private static final Logger log = LoggerFactory.getLogger(AiService.class);
 
     private final OpenAiProvider openAiProvider;
+    private final GeminiProvider geminiProvider;
     private final SemanticEngineAiProvider semanticEngineAiProvider;
 
     @Value("${ai.provider:semantic}")
     private String configuredProvider;
 
-    public AiService(OpenAiProvider openAiProvider, SemanticEngineAiProvider semanticEngineAiProvider) {
+    private volatile String lastAnnouncedProvider;
+
+    public AiService(
+            OpenAiProvider openAiProvider,
+            GeminiProvider geminiProvider,
+            SemanticEngineAiProvider semanticEngineAiProvider) {
         this.openAiProvider = openAiProvider;
+        this.geminiProvider = geminiProvider;
         this.semanticEngineAiProvider = semanticEngineAiProvider;
     }
 
     private AIProvider getActiveProvider() {
-        if ("openai".equalsIgnoreCase(configuredProvider) && openAiProvider.isConfigured()) {
-            return openAiProvider;
+        String requested = configuredProvider == null ? "gemini" : configuredProvider.trim();
+        AIProvider active = semanticEngineAiProvider;
+        String note = null;
+
+        if ("gemini".equalsIgnoreCase(requested)) {
+            if (geminiProvider.isConfigured()) {
+                active = geminiProvider;
+            } else if (openAiProvider.isConfigured()) {
+                active = openAiProvider;
+                note = "ai.provider=gemini but GEMINI_API_KEY is missing - using configured OpenAI provider.";
+            } else {
+                active = semanticEngineAiProvider;
+                note = "ai.provider=gemini but no AI API key configured - running in explicit Offline Mode.";
+            }
+        } else if ("openai".equalsIgnoreCase(requested)) {
+            if (openAiProvider.isConfigured()) {
+                active = openAiProvider;
+            } else if (geminiProvider.isConfigured()) {
+                active = geminiProvider;
+                note = "ai.provider=openai but AI_API_KEY is missing - using configured Gemini provider.";
+            } else {
+                active = semanticEngineAiProvider;
+                note = "ai.provider=openai but no AI API key configured - running in explicit Offline Mode.";
+            }
+        } else if (!"semantic".equalsIgnoreCase(requested) && !"offline".equalsIgnoreCase(requested)) {
+            active = semanticEngineAiProvider;
+            note = "Unknown ai.provider='" + requested + "' - using built-in Offline Mode.";
         }
-        return semanticEngineAiProvider;
+
+        String providerName = active.getProviderName() != null ? active.getProviderName() : active.getClass().getSimpleName();
+        if (note != null) {
+            log.warn("[AI PROVIDER] {} Active provider: {}", note, providerName);
+            lastAnnouncedProvider = null;
+        } else if (!providerName.equals(lastAnnouncedProvider)) {
+            log.info("[AI PROVIDER] Active provider: {} (configured: {})", providerName, requested);
+            lastAnnouncedProvider = providerName;
+        }
+        return active;
+    }
+
+    public SemanticDocumentDto generateDocument(
+            String topic,
+            String overallPrompt,
+            int totalPages,
+            String style,
+            String audience,
+            String difficulty,
+            String plannedDiagramType) {
+
+        log.info("Generating full document notes for topic: '{}', totalPages: {}", topic, totalPages);
+        AIProvider provider = getActiveProvider();
+        SemanticDocumentDto doc = provider.generateDocumentContent(topic, overallPrompt, totalPages, style, audience, difficulty, plannedDiagramType);
+        if (doc.getTopicTitle() == null || doc.getTopicTitle().isBlank()) {
+            doc.setTopicTitle(topic);
+        }
+        return doc;
     }
 
     public PromptAnalysisResponse analyzePrompt(String prompt, String preferredStyle, Integer requestedPageCount) {
@@ -92,11 +152,5 @@ public class AiService {
         }
         content.setPageNumber(pageNum);
         content.setTotalPages(totalPages);
-        if (content.getDefinition() == null || content.getDefinition().isBlank()) {
-            content.setDefinition(content.getTopicTitle() + " is an essential concept with structured mechanisms and practical applications.");
-        }
-        if (content.getSimpleExplanation() == null || content.getSimpleExplanation().isBlank()) {
-            content.setSimpleExplanation("In simple terms, " + content.getTopicTitle() + " provides a streamlined method to solve specific computational or real-world tasks.");
-        }
     }
 }

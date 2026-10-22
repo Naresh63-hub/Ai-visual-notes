@@ -1,6 +1,7 @@
 package com.visualnotes.dto;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 public class NoteDocumentDto {
@@ -13,7 +14,7 @@ public class NoteDocumentDto {
     private String audience;
     private String difficulty;
     private String status;
-    private List<NotePageDto> pages;
+    private List<NotePageDto> pages = new ArrayList<>();
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -31,7 +32,7 @@ public class NoteDocumentDto {
         this.audience = audience;
         this.difficulty = difficulty;
         this.status = status;
-        this.pages = pages;
+        this.pages = pages != null ? pages : new ArrayList<>();
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
@@ -62,6 +63,7 @@ public class NoteDocumentDto {
     public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
 
     public static Builder builder() { return new Builder(); }
+
     public static class Builder {
         private Long id;
         private Long userId;
@@ -72,7 +74,7 @@ public class NoteDocumentDto {
         private String audience;
         private String difficulty;
         private String status;
-        private List<NotePageDto> pages;
+        private List<NotePageDto> pages = new ArrayList<>();
         private LocalDateTime createdAt;
         private LocalDateTime updatedAt;
 

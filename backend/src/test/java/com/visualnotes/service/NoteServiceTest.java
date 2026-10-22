@@ -5,6 +5,8 @@ import com.visualnotes.ai.AiService;
 import com.visualnotes.dto.GenerateNotesRequest;
 import com.visualnotes.dto.NoteDocumentDto;
 import com.visualnotes.dto.PageContentDto;
+import com.visualnotes.dto.RegeneratePageRequest;
+import com.visualnotes.dto.UpdatePageRequest;
 import com.visualnotes.entity.NoteDocument;
 import com.visualnotes.entity.NotePage;
 import com.visualnotes.entity.User;
@@ -50,6 +52,7 @@ class NoteServiceTest {
                 pageRepository,
                 aiService,
                 authService,
+                new com.visualnotes.ai.domain.PagePlanningEngine(),
                 objectMapper
         );
 
@@ -136,5 +139,50 @@ class NoteServiceTest {
             noteService.deleteDocument(300L);
         });
         verify(documentRepository).delete(doc);
+    }
+
+    @Test
+    void testUpdatePageOwnershipCheck() {
+        NoteDocument doc = new NoteDocument();
+        doc.setId(400L);
+        doc.setUser(alice);
+        NotePage page = new NotePage();
+        page.setPageNumber(1);
+        page.setContentJson("{}");
+        doc.setPages(new ArrayList<>(List.of(page)));
+
+        when(documentRepository.findByIdWithPages(400L)).thenReturn(Optional.of(doc));
+
+        UpdatePageRequest req = new UpdatePageRequest();
+        req.setPageNumber(1);
+        req.setContent(new PageContentDto());
+
+        // Bob tries to update Alice's page -> SecurityException
+        when(authService.getCurrentUser()).thenReturn(bob);
+        assertThrows(SecurityException.class, () -> {
+            noteService.updatePageContent(400L, req);
+        });
+    }
+
+    @Test
+    void testRegeneratePageOwnershipCheck() {
+        NoteDocument doc = new NoteDocument();
+        doc.setId(500L);
+        doc.setUser(alice);
+        NotePage page = new NotePage();
+        page.setPageNumber(1);
+        page.setContentJson("{}");
+        doc.setPages(new ArrayList<>(List.of(page)));
+
+        when(documentRepository.findByIdWithPages(500L)).thenReturn(Optional.of(doc));
+
+        RegeneratePageRequest req = new RegeneratePageRequest();
+        req.setPageNumber(1);
+
+        // Bob tries to regenerate Alice's page -> SecurityException
+        when(authService.getCurrentUser()).thenReturn(bob);
+        assertThrows(SecurityException.class, () -> {
+            noteService.regenerateSinglePage(500L, req);
+        });
     }
 }

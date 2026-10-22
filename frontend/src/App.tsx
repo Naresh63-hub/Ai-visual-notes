@@ -77,42 +77,45 @@ export function App() {
   // Seamless Generation: User enters topic & selects pageCount -> AI handles everything
   const handleStartPrompt = async (prompt: string, pageCount: number = 2) => {
     setIsGenerating(true);
-    setGenerationStep('Understanding your topic...');
+    setGenerationStep('Understanding topic & scope...');
 
-    const stepTimer1 = setTimeout(() => {
-      setGenerationStep('Creating your notes...');
-    }, 900);
+    const timer1 = setTimeout(() => {
+      setGenerationStep('Synthesizing educational content...');
+    }, 1500);
 
-    const stepTimer2 = setTimeout(() => {
-      setGenerationStep('Preparing your handwritten pages...');
-    }, 1800);
+    const timer2 = setTimeout(() => {
+      setGenerationStep('Reviewing quality & verifying...');
+    }, 4000);
+
+    const timer3 = setTimeout(() => {
+      setGenerationStep('Formatting handwritten pages...');
+    }, 7000);
+
+    const clearAllTimers = () => {
+      clearTimeout(timer1);
+      clearTimeout(timer2);
+      clearTimeout(timer3);
+    };
 
     try {
-      const analysisResult = await noteService.analyzePrompt(prompt, 'Handwritten', pageCount);
-      const pagesToPlan = pageCount || analysisResult.requestedPageCount || analysisResult.suggestedPageCount || 2;
-      const plan = await noteService.planPages(prompt, pagesToPlan, 'B.Tech / College', 'Handwritten', analysisResult.difficulty);
-
       const doc = await noteService.generateNotes({
         prompt: prompt,
-        pageCount: plan.totalPages,
+        pageCount: pageCount,
         style: 'Handwritten',
         audience: 'B.Tech / College',
         detailLevel: 'Detailed',
-        customPlan: plan,
       });
 
-      clearTimeout(stepTimer1);
-      clearTimeout(stepTimer2);
+      clearAllTimers();
       setCurrentDocument(doc);
       setCurrentPageIndex(0);
       setIsGenerating(false);
       loadRecentNotes();
       addToast('success', `✓ Successfully created your notes!`);
     } catch (err: any) {
-      clearTimeout(stepTimer1);
-      clearTimeout(stepTimer2);
+      clearAllTimers();
       setIsGenerating(false);
-      addToast('error', err.message || 'Failed to create notes');
+      addToast('error', err.message || 'Failed to create notes. Please try again.');
     }
   };
 

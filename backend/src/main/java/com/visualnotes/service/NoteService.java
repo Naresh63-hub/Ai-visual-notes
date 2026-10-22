@@ -3,6 +3,7 @@ package com.visualnotes.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.visualnotes.ai.AiService;
+import com.visualnotes.ai.domain.PagePlanningEngine;
 import com.visualnotes.dto.*;
 import com.visualnotes.entity.NoteDocument;
 import com.visualnotes.entity.NotePage;
@@ -30,14 +31,17 @@ public class NoteService {
     private final NotePageRepository pageRepository;
     private final AiService aiService;
     private final AuthService authService;
+    private final PagePlanningEngine pagePlanningEngine;
     private final ObjectMapper objectMapper;
 
     public NoteService(NoteDocumentRepository documentRepository, NotePageRepository pageRepository,
-                       AiService aiService, AuthService authService, ObjectMapper objectMapper) {
+                       AiService aiService, AuthService authService,
+                       PagePlanningEngine pagePlanningEngine, ObjectMapper objectMapper) {
         this.documentRepository = documentRepository;
         this.pageRepository = pageRepository;
         this.aiService = aiService;
         this.authService = authService;
+        this.pagePlanningEngine = pagePlanningEngine;
         this.objectMapper = objectMapper;
     }
 
@@ -64,41 +68,38 @@ public class NoteService {
 
         Integer reqPageCount = request.getPageCount() != null
                 ? Math.max(1, Math.min(MAX_ALLOWED_PAGES, request.getPageCount()))
-                : null;
+                : 2;
 
-        PromptAnalysisResponse analysis = aiService.analyzePrompt(request.getPrompt(), request.getStyle(), reqPageCount);
-        
-        int targetPageCount = (reqPageCount != null && reqPageCount > 0)
-                ? reqPageCount
-                : (analysis.getRequestedPageCount() != null ? analysis.getRequestedPageCount() : analysis.getSuggestedPageCount());
-
-        targetPageCount = Math.max(1, Math.min(MAX_ALLOWED_PAGES, targetPageCount));
-
+        String safePrompt = truncate(request.getPrompt(), 2000);
         String targetStyle = (request.getStyle() != null && !request.getStyle().isBlank())
                 ? request.getStyle()
-                : analysis.getDetectedStyle();
-
+                : "Handwritten";
         String targetAudience = (request.getAudience() != null && !request.getAudience().isBlank())
                 ? request.getAudience()
-                : analysis.getAudience();
-
+                : "College / Exam Prep";
         String targetDifficulty = (request.getDifficulty() != null && !request.getDifficulty().isBlank())
                 ? request.getDifficulty()
-                : analysis.getDifficulty();
+                : "Exam-Ready";
 
-        PagePlanDto plan = request.getCustomPlan();
-        if (plan == null || plan.getPages() == null || plan.getPages().isEmpty()) {
-            plan = aiService.planPages(request.getPrompt(), targetPageCount, targetAudience, targetStyle, targetDifficulty);
-        }
+        // Step 1: Synthesize the full educational document using the active AI provider in ONE pass
+        SemanticDocumentDto doc = aiService.generateDocument(
+                safePrompt,
+                safePrompt,
+                reqPageCount,
+                targetStyle,
+                targetAudience,
+                targetDifficulty,
+                null
+        );
 
-        String safeTitle = truncate(plan.getDocumentTitle(), MAX_TITLE_LENGTH);
-        String safePrompt = truncate(request.getPrompt(), 2000);
+        int totalPages = reqPageCount;
+        String safeTitle = truncate(doc.getTopicTitle() != null ? doc.getTopicTitle() : safePrompt, MAX_TITLE_LENGTH);
 
         NoteDocument document = NoteDocument.builder()
                 .user(currentUser)
                 .title(safeTitle)
                 .originalPrompt(safePrompt)
-                .pageCount(plan.getPages().size())
+                .pageCount(totalPages)
                 .style(targetStyle)
                 .audience(targetAudience)
                 .difficulty(targetDifficulty)
@@ -108,57 +109,28 @@ public class NoteService {
 
         document = documentRepository.save(document);
 
-        int totalPages = plan.getPages().size();
-        for (int i = 0; i < totalPages; i++) {
-            PagePlanItemDto item = plan.getPages().get(i);
-            int pageNum = i + 1;
-            String pageTopic = truncate(item.getPageTitle(), MAX_TOPIC_TITLE_LENGTH);
+        // Step 2: Deterministically distribute the verified document across the requested pages
+        for (int pageNum = 1; pageNum <= totalPages; pageNum++) {
+            PageContentDto pageContent = pagePlanningEngine.distributeNoteDocument(
+                    doc, pageNum, totalPages, targetStyle, targetAudience, targetDifficulty
+            );
 
             try {
-                PageContentDto contentDto = aiService.generatePage(
-                        pageTopic,
-                        safePrompt,
-                        pageNum,
-                        totalPages,
-                        targetStyle,
-                        targetAudience,
-                        targetDifficulty,
-                        item.getFocusArea(),
-                        item.getPlannedDiagramType()
-                );
-
-                String jsonContent = objectMapper.writeValueAsString(contentDto);
-
+                String jsonContent = objectMapper.writeValueAsString(pageContent);
                 NotePage page = NotePage.builder()
                         .document(document)
                         .pageNumber(pageNum)
-                        .topicTitle(pageTopic)
+                        .topicTitle(truncate(pageContent.getTopicTitle(), MAX_TOPIC_TITLE_LENGTH))
                         .contentJson(jsonContent)
-                        .layoutType(contentDto.getLayoutHint() != null ? contentDto.getLayoutHint() : "standard")
-                        .diagramType(contentDto.getDiagram() != null ? contentDto.getDiagram().getType() : "concept-map")
+                        .layoutType(pageContent.getLayoutHint() != null ? pageContent.getLayoutHint() : "standard")
+                        .diagramType(pageContent.getDiagram() != null ? pageContent.getDiagram().getType() : "concept-map")
                         .build();
 
                 page = pageRepository.save(page);
                 document.getPages().add(page);
-
-            } catch (Exception e) {
-                log.error("Error generating page {} for doc {}: {}", pageNum, document.getId(), e.getMessage(), e);
-                PageContentDto fallbackContent = createFallbackPage(pageTopic, pageNum, totalPages, targetStyle, targetAudience, targetDifficulty);
-                try {
-                    String fallbackJson = objectMapper.writeValueAsString(fallbackContent);
-                    NotePage fallbackPage = NotePage.builder()
-                            .document(document)
-                            .pageNumber(pageNum)
-                            .topicTitle(pageTopic)
-                            .contentJson(fallbackJson)
-                            .layoutType("standard")
-                            .diagramType("concept-map")
-                            .build();
-                    fallbackPage = pageRepository.save(fallbackPage);
-                    document.getPages().add(fallbackPage);
-                } catch (JsonProcessingException jpe) {
-                    log.error("Critical: Failed to serialize fallback page: {}", jpe.getMessage());
-                }
+            } catch (JsonProcessingException e) {
+                log.error("Failed to serialize page {} for doc {}: {}", pageNum, document.getId(), e.getMessage());
+                throw new IllegalStateException("Failed to serialize generated page content", e);
             }
         }
 

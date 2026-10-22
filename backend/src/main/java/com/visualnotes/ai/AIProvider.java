@@ -29,4 +29,16 @@ public interface AIProvider {
             String customModifier,
             String style
     );
+
+    default com.visualnotes.dto.SemanticDocumentDto generateDocumentContent(
+            String topic,
+            String overallPrompt,
+            int totalPages,
+            String style,
+            String audience,
+            String difficulty,
+            String plannedDiagramType
+    ) {
+        throw new UnsupportedOperationException("Document-level generation not implemented for " + getProviderName());
+    }
 }

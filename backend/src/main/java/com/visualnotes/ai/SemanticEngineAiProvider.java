@@ -42,14 +42,15 @@ public class SemanticEngineAiProvider implements AIProvider {
         if (prompt == null || prompt.trim().isEmpty()) {
             prompt = "Binary Search";
         }
+        log.info("[REQUEST] Analyze prompt: '{}', requestedPages: {}", prompt, requestedPageCount);
         TopicUnderstandingEngine.TopicUnderstandingResult understanding =
                 topicUnderstandingEngine.understand(prompt, requestedPageCount);
 
-        String mainSubject = understanding.getNormalizedTopic();
-        if (understanding.getPrimarySubtopics() != null && understanding.getPrimarySubtopics().size() > 1) {
-            mainSubject = String.join(" vs ", understanding.getPrimarySubtopics());
-        }
+        log.info("[UNDERSTANDING] mainConcept='{}', intent={}, domain={}, scope={}, isMultiEntity={}",
+                understanding.getMainConcept(), understanding.getIntent(), understanding.getDomain(),
+                understanding.getRequestedScope(), understanding.isMultiEntityComparison());
 
+        String mainSubject = understanding.getNormalizedTopic();
         String pageMode = understanding.getRequestedPageCount() != null ? "EXPLICIT" : "AUTOMATIC";
 
         return PromptAnalysisResponse.builder()
@@ -78,12 +79,58 @@ public class SemanticEngineAiProvider implements AIProvider {
 
     @Override
     public PagePlanDto planPages(String prompt, int pageCount, String audience, String style, String difficulty) {
+        log.info("[REQUEST] Plan {} pages for prompt: '{}'", pageCount, prompt);
         TopicUnderstandingEngine.TopicUnderstandingResult understanding =
                 topicUnderstandingEngine.understand(prompt, pageCount);
         ContentPlanningEngine.TeachingPlan plan =
                 contentPlanningEngine.createTeachingPlan(understanding);
 
+        log.info("[CONTENT PLAN] Topic: '{}', Sections: {}, IncludeDiagram: {}, IncludeTable: {}, IncludeFormula: {}",
+                plan.getTopic(), plan.getSections().size(), plan.isIncludeDiagram(), plan.isIncludeComparisonTable(), plan.isIncludeFormula());
+
         return pagePlanningEngine.plan(prompt, pageCount, understanding, plan);
+    }
+
+    @Override
+    public SemanticDocumentDto generateDocumentContent(
+            String topic,
+            String overallPrompt,
+            int totalPages,
+            String style,
+            String audience,
+            String difficulty,
+            String plannedDiagramType) {
+
+        String promptToAnalyze = (overallPrompt != null && !overallPrompt.isBlank()) ? overallPrompt : topic;
+        log.info("[REQUEST] [OFFLINE] Generate full document for topic='{}', overallPrompt='{}', totalPages={}", topic, promptToAnalyze, totalPages);
+
+        TopicUnderstandingEngine.TopicUnderstandingResult understanding =
+                topicUnderstandingEngine.understand(promptToAnalyze, totalPages);
+        if (topic != null && !topic.isBlank() && !understanding.isMultiEntityComparison()) {
+            understanding.setNormalizedTopic(topicUnderstandingEngine.extractCleanTopicTitle(topic));
+        }
+
+        ContentPlanningEngine.TeachingPlan plan =
+                contentPlanningEngine.createTeachingPlan(understanding);
+
+        if (plannedDiagramType != null && !plannedDiagramType.isBlank()) {
+            plan.setDiagramType(plannedDiagramType);
+        }
+
+        SemanticDocumentDto doc = contentSynthesisEngine.synthesizeDocument(
+                understanding, plan, totalPages, style, audience, difficulty
+        );
+
+        // Convert understanding into SemanticAnalysisDto for validation
+        SemanticAnalysisDto analysis = new SemanticAnalysisDto();
+        analysis.setMainTopic(understanding.getNormalizedTopic());
+        analysis.setDomain(understanding.getDomain().name());
+        analysis.setSubdomain(understanding.getSubdomain());
+        analysis.setScope(understanding.getRequestedScope() != null ? String.join(", ", understanding.getRequestedScope()) : "");
+        analysis.setMultiEntityComparison(understanding.isMultiEntityComparison());
+        contentQualityValidator.validateAndSanitize(doc, analysis);
+
+        return doc;
     }
 
     @Override
@@ -99,11 +146,17 @@ public class SemanticEngineAiProvider implements AIProvider {
             String plannedDiagramType) {
 
         String promptToAnalyze = (overallPrompt != null && !overallPrompt.isBlank()) ? overallPrompt : topic;
+        log.info("[REQUEST] Generate page {}/{} for topic='{}', overallPrompt='{}'", pageNumber, totalPages, topic, promptToAnalyze);
+
         TopicUnderstandingEngine.TopicUnderstandingResult understanding =
                 topicUnderstandingEngine.understand(promptToAnalyze, totalPages);
-        if (topic != null && !topic.isBlank()) {
+        if (topic != null && !topic.isBlank() && !understanding.isMultiEntityComparison()) {
             understanding.setNormalizedTopic(topicUnderstandingEngine.extractCleanTopicTitle(topic));
         }
+
+        log.info("[UNDERSTANDING] mainConcept='{}', intent={}, domain={}, scope={}",
+                understanding.getMainConcept(), understanding.getIntent(), understanding.getDomain(), understanding.getRequestedScope());
+
         ContentPlanningEngine.TeachingPlan plan =
                 contentPlanningEngine.createTeachingPlan(understanding);
 
@@ -111,13 +164,17 @@ public class SemanticEngineAiProvider implements AIProvider {
             plan.setDiagramType(plannedDiagramType);
         }
 
+        log.info("[CONTENT PLAN] Generating page {} with plan for topic='{}'", pageNumber, plan.getTopic());
+
         // 1. Synthesize Content
         PageContentDto page = contentSynthesisEngine.synthesizePage(
                 understanding, plan, pageNumber, totalPages, style, audience, difficulty
         );
+        log.info("[SYNTHESIS] Synthesized page {} title='{}', sections={}", pageNumber, page.getTopicTitle(), page.getSections() != null ? page.getSections().size() : 0);
 
         // 2. Run Second-Pass Quality Critic & Template Purge
         contentQualityValidator.validateAndSanitize(page, understanding, plan);
+        log.info("[VALIDATION] Validated page {} topicTitle='{}', categoryBadge='{}'", pageNumber, page.getTopicTitle(), page.getCategoryBadge());
 
         return page;
     }
